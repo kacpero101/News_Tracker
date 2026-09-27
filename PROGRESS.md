@@ -38,6 +38,8 @@ _Ostatnia aktualizacja: 2026-09-27_
 
 - **Nowe funkcje (runda 2):** `Topic` jako typ otwarty + `CustomCategory`, `MuteList`/`SimilarNewsSuggester`, `ReadArchive` + `DayGrouping`, `YahooSymbolSearch`. W aplikacji: `TopicCatalog`, `TopicChips` (Newsy i „Do przeczytania”), `CategoryEditorView`, `IgnoreSimilarView`/`MutedNewsView`/`CategoriesSettingsView`, `ReadArchiveView`, `PriceAlertsArchiveView`, wyszukiwarka w `AssetEditorView`.
 
+- Runda 2 (kategorie, ignorowanie, przeczytane i archiwa, wyszukiwarka instrumentów) **zbudowana w Xcode bez błędów** (2026-09-27).
+
 ## Następne (propozycje po MVP)
 
 - Zweryfikować źródła RSS na prawdziwej sieci i ustawić `"verified": true` (lub podmienić niedziałające).
