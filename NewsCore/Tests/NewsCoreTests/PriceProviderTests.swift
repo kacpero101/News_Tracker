@@ -51,7 +51,7 @@ final class PriceProviderTests: XCTestCase {
         let client = MockHTTPClient([
             try CoinGeckoProvider.request(coinID: "bitcoin", currency: "usd", window: 54 * 3600).url!: .ok(try Fixtures.data("coingecko_market_chart.json")),
             try YahooFinanceProvider.request(symbol: "AAPL", window: 30 * 3600).url!: .ok(try Fixtures.data("yahoo_chart.json")),
-            try YahooFinanceProvider.request(symbol: "NOPE", window: 30 * 3600).url!: .status(404),
+            try YahooFinanceProvider.request(symbol: "NOPE", window: 30 * 3600).url!: .status(503),
         ])
         let runner = PriceWatchRunner(prices: PriceService(client: client))
         let report = await runner.run(assets: [btc, aapl, broken, noRules], now: date("2024-05-01T14:00:00Z"), previousCheck: nil)
@@ -60,7 +60,7 @@ final class PriceProviderTests: XCTestCase {
         XCTAssertEqual(report.alerts.map(\.asset.id), ["btc"])
         XCTAssertEqual(report.alerts.first?.move.changePercent ?? 0, 10.1667, accuracy: 0.001)
         XCTAssertEqual(Set(report.series.keys), ["btc", "aapl"])
-        XCTAssertEqual(report.failures, ["broken": "HTTP status 404"])
+        XCTAssertEqual(report.failures, ["broken": "HTTP status 503"])
         XCTAssertEqual(client.requests.count, 3)
     }
 

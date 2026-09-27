@@ -37,7 +37,7 @@ public struct AggregationResult: Sendable {
 public struct FeedAggregator: Sendable {
     private let client: HTTPClient
     private let parser: FeedParser
-    private let classifier: TopicClassifier
+    private var classifier: TopicClassifier
     private let deduplicator: Deduplicator
     private let timeout: TimeInterval
     private let maxItemsPerSource: Int
@@ -59,6 +59,13 @@ public struct FeedAggregator: Sendable {
         self.timeout = timeout
         self.maxItemsPerSource = maxItemsPerSource
         self.now = now
+    }
+
+    /// A copy using another classifier (e.g. after the user edits custom categories).
+    public func replacingClassifier(_ classifier: TopicClassifier) -> FeedAggregator {
+        var copy = self
+        copy.classifier = classifier
+        return copy
     }
 
     /// Fetches all given sources in parallel.

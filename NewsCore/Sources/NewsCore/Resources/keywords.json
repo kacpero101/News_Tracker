@@ -162,7 +162,11 @@
         "downing street",
         "war",
         "ceasefire",
-        "treaty"
+        "treaty",
+        "eu",
+        "european union",
+        "european commission",
+        "united nations"
       ],
       "pl": [
         "wybor*",
@@ -193,7 +197,13 @@
         "koalicj*",
         "opozycj*",
         "wojn*",
-        "rozejm*"
+        "rozejm*",
+        "onz",
+        "ue",
+        "unia europejsk*",
+        "unii europejskiej",
+        "komisj* europejsk*",
+        "parlament* europejsk*"
       ],
       "de": [
         "wahl*",
@@ -224,7 +234,13 @@
         "diplomat*",
         "abgeordnet*",
         "krieg*",
-        "waffenruhe"
+        "waffenruhe",
+        "eu",
+        "uno",
+        "europaische union",
+        "europaeische union",
+        "eu-kommission",
+        "vereinte nationen"
       ]
     },
     "breakthroughs": {
@@ -497,7 +513,9 @@
         "drozyzn*",
         "koszt* zycia",
         "placa minimalna",
-        "placy minimalnej"
+        "placy minimalnej",
+        "gus",
+        "pkb"
       ],
       "de": [
         "wirtschaft*",

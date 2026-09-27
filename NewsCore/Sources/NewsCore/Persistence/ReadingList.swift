@@ -43,6 +43,12 @@ public actor ReadingList {
         return true
     }
 
+    /// Re-evaluates custom-category topics of saved articles (see `Article.reclassified`).
+    public func reclassify(with classifier: TopicClassifier, managing managed: Set<Topic>) throws {
+        articles = articles.map { $0.reclassified(with: classifier, managing: managed) }
+        try persist()
+    }
+
     private func persist() throws {
         try store?.save(articles)
     }

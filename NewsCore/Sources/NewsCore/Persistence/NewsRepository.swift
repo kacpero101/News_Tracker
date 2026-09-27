@@ -9,7 +9,7 @@ public actor NewsRepository {
         public var newArticleCount: Int
     }
 
-    private let aggregator: FeedAggregator
+    private var aggregator: FeedAggregator
     private let cache: JSONFileStore<[Article]>?
     private let deduplicator: Deduplicator
     private let maxAge: TimeInterval
@@ -65,6 +65,16 @@ public actor NewsRepository {
         let byID = Dictionary(updated.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         articles = articles.map { byID[$0.id] ?? $0 }
         try? cache?.save(articles)
+    }
+
+    /// Switches to a new classifier and re-evaluates the `managed` topics (custom categories)
+    /// of all cached articles. Returns the updated articles.
+    @discardableResult
+    public func applyClassifier(_ classifier: TopicClassifier, managing managed: Set<Topic>) -> [Article] {
+        aggregator = aggregator.replacingClassifier(classifier)
+        articles = cachedArticles().map { $0.reclassified(with: classifier, managing: managed) }
+        try? cache?.save(articles)
+        return articles
     }
 
     public func clearCache() {

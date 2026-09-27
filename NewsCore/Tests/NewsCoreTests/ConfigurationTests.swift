@@ -9,7 +9,7 @@ final class ConfigurationTests: XCTestCase {
         for language in Language.allCases {
             XCTAssertTrue(sources.contains { $0.language == language }, "No source for \(language)")
         }
-        for topic in Topic.allCases {
+        for topic in Topic.builtIn {
             XCTAssertTrue(sources.contains { $0.defaultCategory == topic }, "No source for \(topic)")
         }
         for source in sources {
@@ -19,7 +19,7 @@ final class ConfigurationTests: XCTestCase {
 
     func testBundledKeywordsCoverAllTopicsAndLanguages() throws {
         let keywords = try NewsConfiguration.defaultKeywords()
-        for topic in Topic.allCases {
+        for topic in Topic.builtIn {
             let list = try XCTUnwrap(keywords.topics[topic], "Missing keywords for \(topic)")
             for language in Language.allCases {
                 XCTAssertFalse(list.keywords(for: language).isEmpty, "\(topic) has no \(language) keywords")
@@ -40,8 +40,9 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertFalse(sources[0].verified)
     }
 
-    func testUnknownTopicInKeywordsFails() {
+    func testKeywordListAcceptsAdditionalTopicsButNotEmptyNames() throws {
         let json = #"{"topics": {"sports": {"en": ["goal"]}}}"#
-        XCTAssertThrowsError(try NewsConfiguration.decodeKeywords(from: Data(json.utf8)))
+        XCTAssertEqual(try NewsConfiguration.decodeKeywords(from: Data(json.utf8)).topics.keys.map(\.rawValue), ["sports"])
+        XCTAssertThrowsError(try NewsConfiguration.decodeKeywords(from: Data(#"{"topics": {" ": {}}}"#.utf8)))
     }
 }

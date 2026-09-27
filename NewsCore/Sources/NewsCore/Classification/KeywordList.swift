@@ -68,13 +68,14 @@ public struct KeywordList: Codable, Equatable, Sendable {
         let raw = try container.decode([String: TopicKeywords].self, forKey: .topics)
         var topics: [Topic: TopicKeywords] = [:]
         for (key, value) in raw {
-            guard let topic = Topic(rawValue: key) else {
+            let name = key.trimmingCharacters(in: .whitespaces)
+            guard !name.isEmpty else {
                 throw DecodingError.dataCorruptedError(
                     forKey: .topics, in: container,
-                    debugDescription: "Unknown topic '\(key)' in keyword list"
+                    debugDescription: "Empty topic name in keyword list"
                 )
             }
-            topics[topic] = value
+            topics[Topic(rawValue: name)] = value
         }
         self.topics = topics
     }

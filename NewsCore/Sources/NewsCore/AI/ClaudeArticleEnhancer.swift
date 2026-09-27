@@ -107,7 +107,7 @@ public struct ClaudeArticleEnhancer: Sendable {
         "properties": [
             "topics": [
                 "type": "array",
-                "items": ["type": "string", "enum": Topic.allCases.map(\.rawValue)],
+                "items": ["type": "string", "enum": Topic.builtIn.map(\.rawValue)],
             ],
             "summary": ["type": "string"],
         ],
@@ -134,7 +134,7 @@ public struct ClaudeArticleEnhancer: Sendable {
         else {
             throw ClaudeError.invalidResponse("missing JSON text block")
         }
-        let topics = (payload["topics"] as? [String] ?? []).compactMap(Topic.init(rawValue:))
+        let topics = (payload["topics"] as? [String] ?? []).map(Topic.init(rawValue:)).filter(\.isBuiltIn)
         let summary = (payload["summary"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         return AIEnhancement(topics: Set(topics), summary: summary)
     }

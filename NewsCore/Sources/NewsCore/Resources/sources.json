@@ -13,15 +13,15 @@
     { "id": "coindesk", "name": "CoinDesk", "url": "https://www.coindesk.com/arc/outboundfeeds/rss/", "language": "en", "defaultCategory": "crypto", "verified": false },
     { "id": "cointelegraph", "name": "Cointelegraph", "url": "https://cointelegraph.com/rss", "language": "en", "defaultCategory": "crypto", "verified": false },
 
-    { "id": "bankier", "name": "Bankier.pl", "url": "https://www.bankier.pl/rss/wiadomosci.xml", "language": "pl", "defaultCategory": "finance", "verified": false },
+    { "id": "bankier", "name": "Bankier.pl", "url": "https://www.bankier.pl/rss/wiadomosci.xml", "language": "pl", "defaultCategory": null, "verified": false },
     { "id": "polsatnews-biznes", "name": "Polsat News – Biznes", "url": "https://www.polsatnews.pl/rss/biznes.xml", "language": "pl", "defaultCategory": "economy", "verified": false },
-    { "id": "polsatnews-polska", "name": "Polsat News – Polska", "url": "https://www.polsatnews.pl/rss/polska.xml", "language": "pl", "defaultCategory": "politics", "verified": false },
+    { "id": "polsatnews-polska", "name": "Polsat News – Polska", "url": "https://www.polsatnews.pl/rss/polska.xml", "language": "pl", "defaultCategory": null, "verified": false },
     { "id": "tvn24-najnowsze", "name": "TVN24 – Najnowsze", "url": "https://tvn24.pl/najnowsze.xml", "language": "pl", "defaultCategory": null, "verified": false },
     { "id": "naukawpolsce", "name": "Nauka w Polsce (PAP)", "url": "https://naukawpolsce.pl/rss.xml", "language": "pl", "defaultCategory": "breakthroughs", "verified": false },
     { "id": "rp-ekonomia", "name": "Rzeczpospolita – Ekonomia", "url": "https://www.rp.pl/rss/1856-ekonomia", "language": "pl", "defaultCategory": "economy", "verified": false },
 
     { "id": "tagesschau-wirtschaft", "name": "tagesschau – Wirtschaft", "url": "https://www.tagesschau.de/wirtschaft/index~rss2.xml", "language": "de", "defaultCategory": "economy", "verified": false },
-    { "id": "tagesschau-inland", "name": "tagesschau – Inland", "url": "https://www.tagesschau.de/inland/index~rss2.xml", "language": "de", "defaultCategory": "politics", "verified": false },
+    { "id": "tagesschau-inland", "name": "tagesschau – Inland", "url": "https://www.tagesschau.de/inland/index~rss2.xml", "language": "de", "defaultCategory": null, "verified": false },
     { "id": "spiegel-wirtschaft", "name": "DER SPIEGEL – Wirtschaft", "url": "https://www.spiegel.de/wirtschaft/index.rss", "language": "de", "defaultCategory": "economy", "verified": false },
     { "id": "spiegel-politik", "name": "DER SPIEGEL – Politik", "url": "https://www.spiegel.de/politik/index.rss", "language": "de", "defaultCategory": "politics", "verified": false },
     { "id": "spiegel-wissenschaft", "name": "DER SPIEGEL – Wissenschaft", "url": "https://www.spiegel.de/wissenschaft/index.rss", "language": "de", "defaultCategory": "breakthroughs", "verified": false },

@@ -5,12 +5,18 @@ import FoundationNetworking
 
 public enum PriceProviderError: Error, Equatable, LocalizedError {
     case invalidSymbol(String)
+    /// The provider does not know the symbol (HTTP 404).
+    case symbolNotFound(String, provider: PriceProviderID)
     case noData(String)
     case invalidResponse(String)
 
     public var errorDescription: String? {
         switch self {
         case let .invalidSymbol(symbol): return "Nieprawidłowy symbol: \(symbol)"
+        case let .symbolNotFound(symbol, .yahoo):
+            return "Yahoo Finance nie zna symbolu „\(symbol)”. ETF-y i akcje spoza USA mają sufiks giełdy, np. .L (Londyn), .DE (Xetra), .AS (Amsterdam), .MI (Mediolan), .WA (GPW). Użyj wyszukiwarki."
+        case let .symbolNotFound(symbol, .coingecko):
+            return "CoinGecko nie zna monety „\(symbol)”. Użyj ID z adresu strony monety, np. bitcoin."
         case let .noData(details): return "Brak danych: \(details)"
         case let .invalidResponse(details): return "Nieprawidłowa odpowiedź: \(details)"
         }
@@ -23,8 +29,11 @@ public protocol PriceHistoryProvider: Sendable {
 }
 
 extension HTTPClient {
-    func fetchJSON(_ request: URLRequest) async throws -> Data {
+    func fetchJSON(_ request: URLRequest, notFound: PriceProviderError? = nil) async throws -> Data {
         let (data, response) = try await send(request)
+        if response.statusCode == 404, let notFound {
+            throw notFound
+        }
         guard (200..<300).contains(response.statusCode) else {
             throw HTTPClientError.badStatus(response.statusCode)
         }
@@ -127,7 +136,7 @@ public struct YahooFinanceProvider: PriceHistoryProvider {
     }
 
     public func history(for asset: WatchedAsset, covering window: TimeInterval) async throws -> PriceSeries {
-        let data = try await client.fetchJSON(Self.request(symbol: asset.symbol, window: window))
+        let data = try await client.fetchJSON(Self.request(symbol: asset.symbol, window: window), notFound: .symbolNotFound(asset.symbol, provider: .yahoo))
         return try Self.parse(data, assetID: asset.id)
     }
 }
@@ -181,7 +190,10 @@ public struct CoinGeckoProvider: PriceHistoryProvider {
 
     public func history(for asset: WatchedAsset, covering window: TimeInterval) async throws -> PriceSeries {
         let currency = asset.currency ?? "usd"
-        let data = try await client.fetchJSON(Self.request(coinID: asset.symbol, currency: currency, window: window))
+        let data = try await client.fetchJSON(
+            Self.request(coinID: asset.symbol, currency: currency, window: window),
+            notFound: .symbolNotFound(asset.symbol, provider: .coingecko)
+        )
         return try Self.parse(data, assetID: asset.id, currency: currency)
     }
 }
