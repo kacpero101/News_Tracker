@@ -24,7 +24,7 @@ _Ostatnia aktualizacja: 2026-09-27_
   - `NewsRepository` (cache 7 dni / 1500 artykułów), `ReadingList`, `JSONFileStore`.
   - `ClaudeArticleEnhancer` – opcjonalny, surowe HTTP do Messages API, structured output (JSON Schema).
 - **Aplikacja** (`NewsTrackerApp/`): zakładki Newsy / Do przeczytania / Ustawienia; chipy tematów, menu języków, `searchable`, `refreshable`, swipe „do przeczytania”, menu kontekstowe (przeglądarka, udostępnianie), `SFSafariViewController`, baner niedostępnych źródeł, włączanie/wyłączanie źródeł, ustawienia AI (Keychain, wybór modelu), czyszczenie cache.
-- **`project.yml`** dla XcodeGen (iOS 17, zależność od lokalnego pakietu `NewsCore`, generowany Info.plist).
+- **`project.yml`** dla XcodeGen (iOS 17, zależność od lokalnego pakietu `NewsCore`, generowany Info.plist). Zweryfikowany w chmurze: XcodeGen zbudowany ze źródeł na Linuksie poprawnie generuje `NewsTracker.xcodeproj` (target iOS 17.0, lokalna referencja do pakietu NewsCore).
 
 ## Następne (propozycje po MVP)
 
