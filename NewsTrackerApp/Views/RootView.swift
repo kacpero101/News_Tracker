@@ -8,6 +8,9 @@ struct RootView: View {
             NewsListView()
                 .tabItem { Label("Newsy", systemImage: "newspaper") }
 
+            MarketsView()
+                .tabItem { Label("Rynki", systemImage: "chart.line.uptrend.xyaxis") }
+
             ReadingListView()
                 .tabItem { Label("Do przeczytania", systemImage: "bookmark") }
                 .badge(store.readingList.count)

@@ -18,6 +18,14 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Rynki") {
+                    NavigationLink {
+                        PriceAlertsSettingsView()
+                    } label: {
+                        Label("Powiadomienia o cenach", systemImage: "bell.badge")
+                    }
+                }
+
                 Section {
                     Toggle("Klasyfikacja i streszczenia AI", isOn: $store.aiEnabled)
                         .disabled(!store.hasAPIKey)
