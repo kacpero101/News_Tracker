@@ -96,3 +96,9 @@ Każda decyzja: **co** + **dlaczego**. Nowe decyzje dopisuj na końcu.
 
 42. **Obronność (`defense`) i Cyberbezpieczeństwo (`cybersecurity`)** zostały dodane na prośbę użytkownika jako kategorie **wbudowane**, a nie własne, żeby miały słowa kluczowe PL/EN/DE. Kategorię domyślną dostały tylko serwisy w całości o tym temacie: Defence24 (obronność) i Zaufana Trzecia Strona (cyberbezpieczeństwo). Unikam słów wieloznacznych, np. samego `cyber*` (Cybertruck, Cyberpunk) czy „włamanie” (też kradzież z mieszkania).
 43. **„Bez kategorii”** to filtr (pseudo-temat `Topic.uncategorized`, nigdy nieprzypisywany artykułom), a nie ukrywanie. Wybrał go użytkownik spośród zaproponowanych opcji. Chip stoi przed „+ Dodaj” na liście Newsy i na liście „Do przeczytania”. Widok „Wszystkie” pokazuje nadal wszystkie newsy.
+
+## Ikona, automatyczne „przeczytane”, wykresy
+
+44. **Ikona aplikacji** generowana skryptem `Tools/generate_app_icon.py` (Pillow): gazeta z rosnącym wykresem na granatowo-turkusowym gradiencie, 1024×1024 bez kanału alfa (format „Single Size” Xcode). Skrypt jest w repo, żeby łatwo zmienić kolory lub motyw.
+45. **„Oznaczaj jako przeczytane po otwarciu”** – domyślnie wyłączone. Otwarcie liczy się przy dotknięciu newsa i przy „Otwórz w przeglądarce”, a nie przy zamknięciu podglądu, bo tak brzmiało wymaganie i jest to przewidywalne.
+46. **Wykresy cen (Swift Charts, iOS 16+):** osobne 7-dniowe historie do wykresów w liście (pobierane najwyżej co 30 min, żeby nie przeciążać darmowych API), niezależne od danych do wykrywania alertów. Dane do wykrywania zostają krótsze i dokładniejsze: Yahoo 15 min zamiast 1 h. Okres liczony jest wstecz od ostatniego notowania, żeby w weekend wykres akcji nie był pusty. Maks. 400 punktów na dużym wykresie i 60 w liście. Kolor zielony lub czerwony zależy od zmiany w okresie.

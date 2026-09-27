@@ -34,6 +34,13 @@ final class MarketStore {
     private(set) var recentAlerts: [AlertRecord] = []
     private(set) var isChecking = false
     private(set) var lastCheck: Date?
+    /// Last 7 days of prices per asset, for the charts in the Markets list.
+    private(set) var chartSeries: [String: PriceSeries] = [:]
+    private var chartFetchedAt: [String: Date] = [:]
+
+    nonisolated static let chartWindow: TimeInterval = 7 * 86_400
+    /// Charts are downloaded again at most this often (fewer requests to free APIs).
+    private let chartMaxAge: TimeInterval = 30 * 60
 
     /// Local notifications (off until the user enables them and grants permission).
     var notificationsEnabled: Bool {
@@ -140,6 +147,37 @@ final class MarketStore {
         record.quoteURL ?? asset(withID: record.assetID)?.quoteURL
     }
 
+    // MARK: Charts
+
+    /// Downloads 7-day histories for assets without a fresh chart (all of them when `force`).
+    func loadCharts(force: Bool = false) async {
+        let now = Date()
+        let stale = assets.filter { asset in
+            force || chartFetchedAt[asset.id].map { now.timeIntervalSince($0) > chartMaxAge } ?? true
+        }
+        guard !stale.isEmpty else { return }
+        let window = Self.chartWindow
+        let prices = PriceService()
+        await withTaskGroup(of: (String, PriceSeries?).self) { group in
+            for asset in stale {
+                group.addTask {
+                    (asset.id, try? await prices.history(for: asset, covering: window))
+                }
+            }
+            for await (id, series) in group {
+                if let series {
+                    chartSeries[id] = series
+                    chartFetchedAt[id] = now
+                }
+            }
+        }
+    }
+
+    /// Price history of any length (asset detail chart).
+    func history(for asset: WatchedAsset, window: TimeInterval) async throws -> PriceSeries {
+        try await PriceService().history(for: asset, covering: window)
+    }
+
     // MARK: Notifications
 
     /// Turns notifications on (asking for permission) or off.
@@ -168,12 +206,16 @@ final class MarketStore {
             assets.append(asset)
         }
         series[asset.id] = nil
+        chartSeries[asset.id] = nil
+        chartFetchedAt[asset.id] = nil
         saveWatchlist()
     }
 
     func delete(at offsets: IndexSet) {
         for index in offsets {
             series[assets[index].id] = nil
+            chartSeries[assets[index].id] = nil
+            chartFetchedAt[assets[index].id] = nil
         }
         assets.remove(atOffsets: offsets)
         saveWatchlist()
