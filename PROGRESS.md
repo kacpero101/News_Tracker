@@ -50,7 +50,7 @@ _Ostatnia aktualizacja: 2026-09-27_
 - Yahoo Finance to nieoficjalne API: może zmienić format lub ograniczać zapytania. W razie problemów można przełączyć krypto na CoinGecko, a dla akcji dopisać innego dostawcę (`PriceHistoryProvider`).
 - Sprawdzanie w tle na iOS jest nieregularne (decyduje system). Do niezawodnych alertów służy GitHub Actions + ntfy.
 
-- **Kod aplikacji SwiftUI nie był kompilowany** (brak Xcode/SDK iOS w chmurze). Pisany ostrożnie pod iOS 17, ale możliwe drobne błędy kompilacji – do sprawdzenia w Xcode.
+- ~~Kod aplikacji SwiftUI nie był kompilowany w chmurze~~: **zbudowany i uruchomiony w Xcode na symulatorze iPhone 17** po jednej poprawce (`NewsStore.init`). Newsy się ładują.
 - **Źródła RSS niezweryfikowane** – proxy chmury blokuje domeny wydawców (`verified: false` dla wszystkich). Niektóre adresy (szczególnie polskie: Rzeczpospolita, Polsat News, TVN24, Nauka w Polsce) mogą wymagać poprawki.
 - Klasyfikacja słowami kluczowymi jest heurystyczna – możliwe fałszywe trafienia (np. „bank” w kontekście innym niż finanse).
 - Atom `content type="xhtml"` (treść jako elementy XML) nie jest wczytywany jako opis – rzadki przypadek; używany jest wtedy `summary`.
