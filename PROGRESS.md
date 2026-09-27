@@ -6,11 +6,12 @@ _Ostatnia aktualizacja: 2026-09-27_
 
 1. ✅ Szkielet repo: `.gitignore`, `PROGRESS.md`, `DECISIONS.md`, `README.md`.
 2. ✅ `NewsCore` (Swift Package, bez UI): modele, parser RSS 2.0 / RSS 1.0 / Atom, czyszczenie HTML i daty, klasyfikator słów kluczowych, deduplikacja, filtrowanie i wyszukiwanie, równoległe pobieranie z izolacją błędów, cache JSON, lista „do przeczytania”, konfiguracja `sources.json` / `keywords.json`.
-3. ✅ Testy jednostkowe na fixtures (bez sieci) – **51 testów, wszystkie przechodzą** (`swift test`, Swift 6.2.4, Linux).
+3. ✅ Testy jednostkowe na fixtures (bez sieci) – **70 testów, wszystkie przechodzą** (`swift test`, Swift 6.2.4, Linux).
 4. ✅ Aplikacja iOS (SwiftUI, iOS 17) + `project.yml` (XcodeGen).
 5. ✅ README z instrukcją krok po kroku.
 6. ✅ Etap opcjonalny: Claude API (domyślnie wyłączone, klucz w Keychain, testy tylko na mockach).
 7. ✅ Pull Request do `main`: https://github.com/kacpero101/News_Tracker/pull/1
+8. ✅ Rynki: śledzenie cen akcji/ETF/krypto, reguły „zmiana ≥ X% w ciągu N h”, powiadomienia lokalne + GitHub Actions/ntfy. **70 testów przechodzi.**
 
 ## Zrobione
 
@@ -26,6 +27,14 @@ _Ostatnia aktualizacja: 2026-09-27_
 - **Aplikacja** (`NewsTrackerApp/`): zakładki Newsy / Do przeczytania / Ustawienia; chipy tematów, menu języków, `searchable`, `refreshable`, swipe „do przeczytania”, menu kontekstowe (przeglądarka, udostępnianie), `SFSafariViewController`, baner niedostępnych źródeł, włączanie/wyłączanie źródeł, ustawienia AI (Keychain, wybór modelu), czyszczenie cache.
 - **`project.yml`** dla XcodeGen (iOS 17, zależność od lokalnego pakietu `NewsCore`, generowany Info.plist). Zweryfikowany w chmurze: XcodeGen zbudowany ze źródeł na Linuksie poprawnie generuje `NewsTracker.xcodeproj` (target iOS 17.0, lokalna referencja do pakietu NewsCore).
 
+- **Rynki** (`NewsCore/Sources/NewsCore/Markets`, `Notifications`, `Sources/PriceWatch`):
+  - `WatchedAsset`/`AlertRule` (okno, próg, kierunek), `PriceWatchConfiguration` (`watchlist.json` w zasobach, `alerts.json` w katalogu głównym),
+  - `YahooFinanceProvider`, `CoinGeckoProvider`, `PriceService` (routing),
+  - `PriceMoveDetector` + `PriceAlertEngine` (tylko nowe ruchy od poprzedniego sprawdzenia), `PriceAlertFormatter` (teksty PL),
+  - `NtfyNotifier`, `PriceWatchRunner` (wspólny dla aplikacji i CLI), CLI `price-watch` (`--dry-run`, `--test`, `--state`),
+  - workflow `.github/workflows/price-watch.yml` (co godzinę, cache kompilacji i stanu).
+- **Aplikacja:** zakładka „Rynki” (ceny, zmiana w oknie każdej reguły, ostatnie alerty), edytor instrumentu i reguł ze sprawdzaniem symbolu, lokalne powiadomienia, `BGAppRefreshTask`, ekran „Powiadomienia o cenach” z instrukcją ntfy i eksportem `alerts.json`.
+
 ## Następne (propozycje po MVP)
 
 - Zweryfikować źródła RSS na prawdziwej sieci i ustawić `"verified": true` (lub podmienić niedziałające).
@@ -36,6 +45,10 @@ _Ostatnia aktualizacja: 2026-09-27_
 - Import/edycja własnych źródeł w aplikacji.
 
 ## Znane problemy
+
+- **API cen niedostępne z chmury** (proxy blokuje Yahoo i CoinGecko): dostawcy przetestowani na zapisanych odpowiedziach. Do sprawdzenia na prawdziwej sieci (patrz niżej).
+- Yahoo Finance to nieoficjalne API: może zmienić format lub ograniczać zapytania. W razie problemów można przełączyć krypto na CoinGecko, a dla akcji dopisać innego dostawcę (`PriceHistoryProvider`).
+- Sprawdzanie w tle na iOS jest nieregularne (decyduje system). Do niezawodnych alertów służy GitHub Actions + ntfy.
 
 - **Kod aplikacji SwiftUI nie był kompilowany** (brak Xcode/SDK iOS w chmurze). Pisany ostrożnie pod iOS 17, ale możliwe drobne błędy kompilacji – do sprawdzenia w Xcode.
 - **Źródła RSS niezweryfikowane** – proxy chmury blokuje domeny wydawców (`verified: false` dla wszystkich). Niektóre adresy (szczególnie polskie: Rzeczpospolita, Polsat News, TVN24, Nauka w Polsce) mogą wymagać poprawki.
@@ -66,7 +79,10 @@ _Ostatnia aktualizacja: 2026-09-27_
    Działające oznacz `"verified": true`; niedziałające popraw lub usuń. W aplikacji niedziałające źródła są też widoczne w banerze „Niedostępne źródła” i w Ustawienia → Kanały RSS.
 5. **Sprawdź na urządzeniu/symulatorze:** pull-to-refresh, filtry tematów i języków, wyszukiwanie (np. „inflacja”, „bitcoin”), swipe „Do przeczytania”, otwieranie artykułu w Safari, wyłączenie źródła w Ustawieniach.
 6. (Opcjonalnie) **AI:** wpisz własny klucz API Anthropic w Ustawienia → AI, włącz przełącznik, odśwież listę – przy artykułach pojawi się streszczenie z ikoną ✨. Pamiętaj, że wywołania są płatne; w tej sesji nie wykonano żadnego prawdziwego wywołania API.
-7. (Opcjonalnie) Dodaj ikonę aplikacji 1024×1024 w `NewsTrackerApp/Resources/Assets.xcassets/AppIcon.appiconset`.
+7. **Rynki:** w zakładce Rynki pociągnij listę w dół. Przy każdym instrumencie powinna pojawić się cena. Dodaj własny instrument i użyj „Sprawdź symbol”. Włącz powiadomienia i wyślij testowe (Ustawienia → Powiadomienia o cenach). Sprawdzanie w tle przetestujesz w Xcode: zatrzymaj aplikację debuggerem i w konsoli LLDB wpisz
+   `e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.example.newstracker.pricecheck"]`.
+8. **Powiadomienia bez aplikacji (po scaleniu PR do `main`):** zainstaluj ntfy na iPhonie i zasubskrybuj losowy temat, dodaj sekret `NTFY_TOPIC` w GitHub (Settings → Secrets and variables → Actions), potem Actions → Price watch → Run workflow z opcją testu. Szczegóły w README („Rynki”).
+9. (Opcjonalnie) Dodaj ikonę aplikacji 1024×1024 w `NewsTrackerApp/Resources/Assets.xcassets/AppIcon.appiconset`.
 
 ## Informacje dla kolejnej sesji
 

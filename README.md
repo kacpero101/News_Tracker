@@ -7,7 +7,8 @@ Natywna aplikacja iOS (Swift/SwiftUI), która zbiera newsy z darmowych kanałów
 - deduplikacja tego samego artykułu z wielu kanałów,
 - lista najnowszych newsów, filtry tematów i języków, wyszukiwarka, pull-to-refresh,
 - lista „Do przeczytania”, oryginał otwierany w `SFSafariViewController`,
-- opcjonalnie (domyślnie wyłączone): klasyfikacja i streszczenia przez Claude API z kluczem w Keychain.
+- opcjonalnie (domyślnie wyłączone): klasyfikacja i streszczenia przez Claude API z kluczem w Keychain,
+- **Rynki**: śledzenie akcji/ETF/kryptowalut i powiadomienia o nagłych zmianach cen (np. BTC: ±8% w 48 h) – lokalnie na iPhonie oraz darmowo przez GitHub Actions + ntfy.
 
 ## Struktura repozytorium
 
@@ -26,8 +27,13 @@ News_Tracker/
 │   │   ├── Persistence/     # JSONFileStore, NewsRepository (cache), ReadingList
 │   │   ├── Config/          # wczytywanie sources.json / keywords.json
 │   │   ├── AI/              # ClaudeArticleEnhancer (opcjonalny)
+│   │   ├── Markets/         # obserwowane instrumenty, Yahoo/CoinGecko, detektor zmian cen
+│   │   ├── Notifications/   # NtfyNotifier (powiadomienia push przez ntfy.sh)
 │   │   └── Resources/       # sources.json, keywords.json
-│   └── Tests/NewsCoreTests/ # testy + Fixtures/ (przykładowe RSS/Atom)
+│   ├── Sources/PriceWatch/  # narzędzie CLI `price-watch` (uruchamiane przez GitHub Actions)
+│   └── Tests/NewsCoreTests/ # testy + Fixtures/ (przykładowe RSS/Atom, odpowiedzi API cen)
+├── alerts.json              # lista obserwowanych instrumentów dla GitHub Actions
+├── .github/workflows/price-watch.yml  # co godzinę: sprawdzenie cen + powiadomienia ntfy
 ├── NewsTrackerApp/          # aplikacja SwiftUI (cienka warstwa UI)
 │   ├── App/                 # NewsTrackerApp, NewsStore (stan aplikacji)
 │   ├── Views/               # lista, wiersz, filtry, do przeczytania, ustawienia
@@ -103,6 +109,41 @@ Po zmianie plików JSON uruchom `swift test` – test `ConfigurationTests` spraw
 ## AI (opcjonalnie)
 
 Domyślnie wyłączone; aplikacja działa w pełni bez tego. Aby włączyć: **Ustawienia → AI** → wklej klucz API Anthropic → „Zapisz klucz” → włącz przełącznik. Klucz trafia wyłącznie do pęku kluczy (Keychain) urządzenia. Do API wysyłany jest tylko nagłówek i krótki opis z RSS, maks. 10 artykułów na odświeżenie. **Wywołania są płatne** (Twoje konto Anthropic); w Ustawieniach można wybrać tańszy model.
+
+## Rynki: powiadomienia o nagłych zmianach cen
+
+Zakładka **Rynki** pokazuje obserwowane instrumenty (akcje, ETF-y, kryptowaluty), ich ostatnią cenę i zmianę w oknie każdej reguły.
+
+**Reguła** = okno czasu + próg + kierunek, np. *BTC: w ciągu 48 h zmiana o co najmniej 8% (wzrost lub spadek)*. Instrument może mieć kilka reguł (np. 4 h / 5% i 48 h / 8%). Zmiana liczona jest od najniższej (wzrost) lub najwyższej (spadek) ceny w oknie, więc wykrywa też gwałtowny ruch w środku okna. Każdy ruch zgłaszany jest raz: dopiero gdy reguła „zaczyna” być spełniona od poprzedniego sprawdzenia.
+
+**Dane cen (darmowe, bez kluczy):**
+- **Yahoo Finance**: akcje, ETF-y, indeksy (np. `AAPL`, `SPY`, `PKN.WA`, `CDR.WA`, `SAP.DE`, `BTC-USD`). To nieoficjalny endpoint i może się zmienić.
+- **CoinGecko**: kryptowaluty po ID monety (`bitcoin`, `ethereum`), waluta USD/EUR/PLN.
+
+Dodawanie i edycja: przycisk **+** w zakładce Rynki lub dotknięcie instrumentu. Przycisk „Sprawdź symbol” weryfikuje, czy dane są dostępne.
+
+### Powiadomienia – dwa darmowe sposoby
+
+**1. Lokalnie na iPhonie (bez konfiguracji)**
+Rynki → „Włącz powiadomienia o zmianach cen”. Ceny są sprawdzane przy otwarciu aplikacji, przy odświeżeniu listy i w tle (`BGAppRefreshTask`). **Ograniczenie iOS:** to system decyduje, kiedy uruchomić sprawdzanie w tle (zwykle co kilka godzin), i nie robi tego po wymuszonym zamknięciu aplikacji.
+
+**2. Niezawodnie: GitHub Actions + ntfy (zalecane)**
+Workflow `.github/workflows/price-watch.yml` co godzinę uruchamia narzędzie `price-watch`, które sprawdza ceny z `alerts.json` i wysyła push przez [ntfy.sh](https://ntfy.sh). Działa niezależnie od telefonu i aplikacji.
+
+1. Zainstaluj aplikację **ntfy** (App Store) i zasubskrybuj temat o długiej, losowej nazwie, np. `newstracker-7f3k9x2q`. Nazwa tematu działa jak hasło: kto ją zna, widzi powiadomienia.
+2. GitHub → repozytorium → **Settings → Secrets and variables → Actions → New repository secret**: nazwa `NTFY_TOPIC`, wartość = nazwa tematu.
+3. Ustaw instrumenty w `alerts.json`: ręcznie albo w aplikacji: **Ustawienia → Powiadomienia o cenach → Kopiuj alerts.json**, potem wklej do pliku i zrób commit do `main`.
+4. Test: **Actions → Price watch → Run workflow**, zaznacz „Send a test notification only”.
+
+Workflow działa tylko z domyślnego brancha (`main`), czyli po scaleniu PR. Koszt: darmowe w ramach limitu GitHub Actions (repo publiczne bez limitu; prywatne 2000 min/mies., a sprawdzanie co godzinę mieści się w nim dzięki cache kompilacji). Po wyczerpaniu limitu workflow się zatrzymuje, nie nalicza opłat, jeśli nie ustawiono płatnego limitu wydatków. Uruchomienia z harmonogramu GitHub bywają opóźnione o kilka–kilkanaście minut.
+
+Lokalnie (Mac/Linux) można uruchomić:
+```bash
+cd NewsCore && swift build --product price-watch
+NTFY_TOPIC=twoj-temat .build/debug/price-watch --config ../alerts.json          # sprawdzenie + powiadomienia
+.build/debug/price-watch --config ../alerts.json --dry-run                      # tylko wypisz
+NTFY_TOPIC=twoj-temat .build/debug/price-watch --test                          # testowe powiadomienie
+```
 
 ## Dokumentacja projektu
 
