@@ -42,6 +42,7 @@ News_Tracker/
 │   ├── Views/               # lista, wiersz, filtry, do przeczytania, ustawienia
 │   ├── Support/             # SafariView, KeychainStore, nazwy wyświetlane
 │   └── Resources/           # Assets.xcassets
+├── Tools/generate_app_icon.py  # generator ikony aplikacji (Pillow)
 ├── PROGRESS.md              # postęp, znane problemy, kroki do wykonania lokalnie
 └── DECISIONS.md             # decyzje projektowe z uzasadnieniem
 ```
@@ -86,7 +87,7 @@ Można też otworzyć `NewsCore/Package.swift` w Xcode i uruchomić testy (**⌘
 
 - **Własne kategorie:** na końcu paska kategorii jest chip **„+ Dodaj”**. Podajesz nazwę, słowa kluczowe (przecinkami; `dron*` dopasowuje odmiany; słowa działają dla wszystkich języków), ikonę i kolor. Już pobrane i zapisane newsy są od razu przypisywane. Przytrzymanie chipa własnej kategorii → edycja lub usunięcie. Lista również w Ustawienia → Kategorie.
 - **Ignoruj podobne:** przytrzymaj news (albo przesuń w prawo) → „Ignoruj podobne…”. Wybierasz słowa z nagłówka (np. „przejeździe” → `przejeźdz*`) albo wpisujesz własne; newsy z tymi słowami znikają z listy. „Ukryj ten news” ukrywa pojedynczy news. Zarządzanie: Ustawienia → Ignorowane słowa.
-- **Do przeczytania:** ikona zakładki przy każdym newsie. Na liście „Do przeczytania” zielony ✓ (lub przesunięcie w prawo) oznacza news jako **przeczytany**: znika z listy i trafia do **archiwum przeczytanych** (ikona archiwum w lewym górnym rogu). Z archiwum można przywrócić news do przeczytania, wyszukiwać i czyścić archiwum. Przeczytane newsy na liście Newsy mają przyciemniony tytuł i ✓.
+- **Do przeczytania:** ikona zakładki przy każdym newsie. Na liście „Do przeczytania” zielony ✓ (lub przesunięcie w prawo) oznacza news jako **przeczytany**: znika z listy i trafia do **archiwum przeczytanych** (ikona archiwum w lewym górnym rogu). Z archiwum można przywrócić news do przeczytania, wyszukiwać i czyścić archiwum. Przeczytane newsy na liście Newsy mają przyciemniony tytuł i ✓. Opcja **Ustawienia → „Oznaczaj jako przeczytane po otwarciu”** (domyślnie wyłączona) robi to automatycznie przy otwarciu artykułu.
 
 ## Konfiguracja
 
@@ -134,6 +135,8 @@ Zakładka **Rynki** pokazuje obserwowane instrumenty (akcje, ETF-y, kryptowaluty
 - **CoinGecko**: kryptowaluty po ID monety (`bitcoin`, `ethereum`), waluta USD/EUR/PLN.
 
 Dodawanie i edycja: przycisk **+** w zakładce Rynki lub dotknięcie instrumentu. **Wyszukiwarka** w edytorze (np. „uranium”, „URNU”) pokazuje symbole z giełdami. Instrumenty spoza USA mają w Yahoo sufiks giełdy (`.L` Londyn, `.DE` Xetra, `.AS`, `.MI`, `.WA`), więc sam symbol (np. `URNU`) nie wystarczy. Przycisk „Sprawdź symbol” weryfikuje dostępność danych, a przy nieznanym symbolu sam uruchamia wyszukiwanie.
+
+Przy każdym instrumencie widać **wykres z ostatnich 7 dni**. Po dotknięciu instrumentu otwiera się ekran szczegółów z dużym wykresem (1 dzień / 7 dni / 30 dni; przesunięcie palcem pokazuje cenę w danym momencie), min./maks., zmianą w okresie, regułami i ostatnimi alertami. Edycja: przycisk „Edytuj” albo przesunięcie wiersza w prawo.
 
 Wszystkie wykryte alerty trafiają do **archiwum alertów** (Rynki → „Archiwum alertów”): pogrupowane po dniach, z filtrem instrumentu. Dotknięcie alertu otwiera notowania.
 

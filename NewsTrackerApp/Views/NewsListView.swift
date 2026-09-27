@@ -149,9 +149,11 @@ struct ArticleListRow: View {
         )
         .onTapGesture {
             presentedArticle = article
+            store.didOpen(article)
         }
         .accessibilityAction(named: "Otwórz artykuł") {
             presentedArticle = article
+            store.didOpen(article)
         }
         .swipeActions(edge: .trailing) {
             Button {
@@ -211,6 +213,7 @@ struct ArticleListRow: View {
             }
             Button {
                 openURL(article.link)
+                store.didOpen(article)
             } label: {
                 Label("Otwórz w przeglądarce", systemImage: "safari")
             }

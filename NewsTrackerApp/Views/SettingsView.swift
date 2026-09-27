@@ -18,7 +18,7 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("Newsy") {
+                Section {
                     NavigationLink {
                         CategoriesSettingsView()
                     } label: {
@@ -29,6 +29,11 @@ struct SettingsView: View {
                     } label: {
                         LabeledContent("Ignorowane słowa", value: "\(store.muteList.keywords.count)")
                     }
+                    Toggle("Oznaczaj jako przeczytane po otwarciu", isOn: $store.autoMarkReadOnOpen)
+                } header: {
+                    Text("Newsy")
+                } footer: {
+                    Text("Po włączeniu otwarty artykuł trafia do archiwum przeczytanych i znika z listy „Do przeczytania”.")
                 }
 
                 Section("Rynki") {

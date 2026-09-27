@@ -29,12 +29,24 @@ struct MarketsView: View {
 
                 Section("Obserwowane") {
                     ForEach(market.assets) { asset in
-                        Button {
-                            editorTarget = EditorTarget(asset: asset)
+                        NavigationLink {
+                            AssetDetailView(assetID: asset.id)
                         } label: {
-                            AssetRow(asset: asset, series: market.series[asset.id], failure: market.failures[asset.id])
+                            AssetRow(
+                                asset: asset,
+                                series: market.series[asset.id],
+                                chart: market.chartSeries[asset.id],
+                                failure: market.failures[asset.id]
+                            )
                         }
-                        .buttonStyle(.plain)
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                editorTarget = EditorTarget(asset: asset)
+                            } label: {
+                                Label("Edytuj", systemImage: "pencil")
+                            }
+                            .tint(.blue)
+                        }
                     }
                     .onDelete { market.delete(at: $0) }
                     .onMove { market.move(from: $0, to: $1) }
@@ -66,7 +78,13 @@ struct MarketsView: View {
                 }
             }
             .navigationTitle("Rynki")
-            .refreshable { await market.check() }
+            .refreshable {
+                await market.check()
+                await market.loadCharts(force: true)
+            }
+            .task(id: market.assets.map(\.id)) {
+                await market.loadCharts()
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if market.isChecking {
@@ -97,20 +115,28 @@ struct MarketsView: View {
 private struct AssetRow: View {
     let asset: WatchedAsset
     let series: PriceSeries?
+    /// 7-day history for the sparkline.
+    let chart: PriceSeries?
     let failure: String?
+
+    private var sparklinePoints: [PricePoint] {
+        PriceSeries.downsample(chart?.points(inLast: MarketStore.chartWindow) ?? [], maxPoints: 60)
+    }
 
     var body: some View {
         let now = Date()
         VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
+            HStack(alignment: .center) {
                 VStack(alignment: .leading) {
                     Text(asset.name).font(.headline)
                     Text(asset.symbol).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                if let latest = series?.latest {
+                PriceChartView(points: sparklinePoints, compact: true)
+                    .frame(width: 84, height: 34)
+                if let latest = series?.latest ?? chart?.latest {
                     VStack(alignment: .trailing) {
-                        Text("\(PriceAlertFormatter.price(latest.price)) \(series?.currency ?? "")")
+                        Text("\(PriceAlertFormatter.price(latest.price)) \((series ?? chart)?.currency ?? "")")
                             .font(.body.monospacedDigit())
                         Text(latest.date, style: .relative)
                             .font(.caption2)
@@ -134,7 +160,7 @@ private struct AssetRow: View {
     }
 }
 
-private struct RuleStatusRow: View {
+struct RuleStatusRow: View {
     let rule: AlertRule
     let points: [PricePoint]
     let now: Date
