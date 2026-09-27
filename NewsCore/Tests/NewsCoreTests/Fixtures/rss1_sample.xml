@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel rdf:about="https://rdf.example.org/">
+    <title>RDF Example</title>
+    <link>https://rdf.example.org/</link>
+    <description>RSS 1.0 sample</description>
+  </channel>
+  <item rdf:about="https://rdf.example.org/a">
+    <title>Sejm uchwalił budżet na przyszły rok</title>
+    <link>https://rdf.example.org/a</link>
+    <description>Posłowie przyjęli ustawę budżetową.</description>
+    <dc:date>2024-05-03T07:00:00+02:00</dc:date>
+  </item>
+</rdf:RDF>

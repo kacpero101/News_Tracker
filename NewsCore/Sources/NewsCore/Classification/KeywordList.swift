@@ -14,7 +14,9 @@ import Foundation
 /// Matching rules (case- and diacritic-insensitive, on word boundaries):
 /// - `"inflation"` matches the whole word only,
 /// - `"inflat*"` matches any word starting with `inflat`,
-/// - `"central bank"` matches the phrase (words in order).
+/// - `"central bank"` matches the phrase (words in order),
+/// - `"stop* procentow*"` combines both: a phrase whose words are prefixes
+///   (useful for inflected languages – matches "stopy procentowe", "stóp procentowych").
 public struct KeywordList: Codable, Equatable, Sendable {
     public struct TopicKeywords: Codable, Equatable, Sendable {
         /// Keywords applied to articles in every language (names, tickers, brands).
