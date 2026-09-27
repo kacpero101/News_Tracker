@@ -68,6 +68,11 @@ final class NewsStore {
 
     // MARK: Optional AI (off by default)
 
+    /// Opening an article marks it as read (moves it to the archive of read news).
+    var autoMarkReadOnOpen: Bool {
+        didSet { defaults.set(autoMarkReadOnOpen, forKey: Keys.autoMarkReadOnOpen) }
+    }
+
     var aiEnabled: Bool {
         didSet { defaults.set(aiEnabled, forKey: Keys.aiEnabled) }
     }
@@ -98,6 +103,7 @@ final class NewsStore {
     private enum Keys {
         static let disabledSources = "disabledSourceIDs"
         static let aiEnabled = "aiEnabled"
+        static let autoMarkReadOnOpen = "autoMarkReadOnOpen"
         static let aiModel = "aiModel"
         static let lastRefresh = "lastRefresh"
     }
@@ -148,6 +154,7 @@ final class NewsStore {
         muteMatcher = mutes.matcher()
         disabledSourceIDs = Set(defaults.stringArray(forKey: Keys.disabledSources) ?? [])
         aiEnabled = defaults.bool(forKey: Keys.aiEnabled)
+        autoMarkReadOnOpen = defaults.bool(forKey: Keys.autoMarkReadOnOpen)
         aiModel = defaults.string(forKey: Keys.aiModel) ?? ClaudeArticleEnhancer.defaultModel
         lastRefresh = defaults.object(forKey: Keys.lastRefresh) as? Date
         hasAPIKey = keychain.read() != nil
@@ -346,6 +353,12 @@ final class NewsStore {
         }
         await reloadReadingList()
         await reloadReadArchive()
+    }
+
+    /// Called when the user opens an article; marks it as read if the setting is on.
+    func didOpen(_ article: Article) {
+        guard autoMarkReadOnOpen, !isRead(article) else { return }
+        Task { await markRead(article) }
     }
 
     /// Removes the "read" mark without adding the article back to the reading list.
