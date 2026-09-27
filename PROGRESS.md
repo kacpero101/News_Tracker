@@ -56,7 +56,7 @@ _Ostatnia aktualizacja: 2026-09-27_
 - Sprawdzanie w tle na iOS jest nieregularne (decyduje system). Do niezawodnych alertów służy GitHub Actions + ntfy.
 
 - ~~Kod aplikacji SwiftUI nie był kompilowany w chmurze~~: **zbudowany i uruchomiony w Xcode na symulatorze iPhone 17** po jednej poprawce (`NewsStore.init`). Newsy się ładują.
-- **Źródła RSS niezweryfikowane** – proxy chmury blokuje domeny wydawców (`verified: false` dla wszystkich). Niektóre adresy (szczególnie polskie: Rzeczpospolita, Polsat News, TVN24, Nauka w Polsce) mogą wymagać poprawki.
+- **Źródła RSS:** 25 z 26 kanałów działało w aplikacji na symulatorze (2026-09-27) i ma `verified: true`. Rzeczpospolita – Ekonomia zwracała 404; adres zmieniono na `https://www.rp.pl/rss/451-ekonomia` (znaleziony w wyszukiwarce, niezweryfikowany, `verified: false`).
 - Klasyfikacja słowami kluczowymi jest heurystyczna – możliwe fałszywe trafienia (np. „bank” w kontekście innym niż finanse).
 - Atom `content type="xhtml"` (treść jako elementy XML) nie jest wczytywany jako opis – rzadki przypadek; używany jest wtedy `summary`.
 

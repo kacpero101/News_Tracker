@@ -60,7 +60,7 @@ final class PriceProviderTests: XCTestCase {
         XCTAssertEqual(report.alerts.map(\.asset.id), ["btc"])
         XCTAssertEqual(report.alerts.first?.move.changePercent ?? 0, 10.1667, accuracy: 0.001)
         XCTAssertEqual(Set(report.series.keys), ["btc", "aapl"])
-        XCTAssertEqual(report.failures, ["broken": "HTTP status 503"])
+        XCTAssertEqual(report.failures, ["broken": "Błąd serwera (HTTP 503)"])
         XCTAssertEqual(client.requests.count, 3)
     }
 

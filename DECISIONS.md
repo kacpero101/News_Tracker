@@ -48,7 +48,7 @@ Każda decyzja: **co** + **dlaczego**. Nowe decyzje dopisuj na końcu.
 ## Źródła
 
 16. **Źródła RSS (26 kanałów: 12 EN, 6 PL, 8 DE)** – renomowane media z darmowymi kanałami bez kluczy (BBC, The Guardian, CNBC, NPR, ScienceDaily, Nature, Ars Technica, CoinDesk, Cointelegraph, Bankier.pl, Polsat News, TVN24, Nauka w Polsce, Rzeczpospolita, tagesschau, DER SPIEGEL, Handelsblatt, heise, BTC-ECHO).
-    **Wszystkie mają `"verified": false`** – proxy środowiska chmurowego blokuje te domeny, więc nie dało się sprawdzić adresów. Aplikacja pokazuje nieudane źródła; do weryfikacji lokalnie (patrz `PROGRESS.md`). Źródła można wyłączać w Ustawieniach.
+    Początkowo wszystkie miały `"verified": false` (proxy chmury blokuje te domeny). Po pierwszym uruchomieniu na symulatorze 25 kanałów działało i ma `verified: true`; Rzeczpospolita – Ekonomia (404) dostała nowy adres `rss/451-ekonomia`, na razie niezweryfikowany. Źródła można wyłączać w Ustawieniach.
 
 ## AI (etap opcjonalny)
 

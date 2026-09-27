@@ -29,7 +29,7 @@ final class FeedAggregatorTests: XCTestCase {
         XCTAssertEqual(result.articles.count, 5)
         XCTAssertEqual(result.succeededSourceIDs, ["en", "de"])
         XCTAssertEqual(result.failures.map(\.sourceID), ["broken", "404", "garbage"])
-        XCTAssertEqual(result.failures[1].message, "HTTP status 404")
+        XCTAssertEqual(result.failures[1].message, "Nie znaleziono (HTTP 404) – adres jest nieaktualny")
         XCTAssertEqual(client.requests.count, 5)
     }
 

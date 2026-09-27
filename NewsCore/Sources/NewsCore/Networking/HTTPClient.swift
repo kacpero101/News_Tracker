@@ -14,8 +14,9 @@ public enum HTTPClientError: Error, Equatable, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .nonHTTPResponse: return "The server returned a non-HTTP response"
-        case let .badStatus(code): return "HTTP status \(code)"
+        case .nonHTTPResponse: return "Serwer zwrócił nieprawidłową odpowiedź"
+        case .badStatus(404): return "Nie znaleziono (HTTP 404) – adres jest nieaktualny"
+        case let .badStatus(code): return "Błąd serwera (HTTP \(code))"
         }
     }
 }
