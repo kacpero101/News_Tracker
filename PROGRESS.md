@@ -43,6 +43,8 @@ _Ostatnia aktualizacja: 2026-09-27_
 - Runda 2 (kategorie, ignorowanie, przeczytane i archiwa, wyszukiwarka instrumentów) **zbudowana w Xcode bez błędów** (2026-09-27).
 - Runda 3 (nowe źródła, „Dodaj źródło”, automatyczne znajdowanie kanału, Obronność, Cyberbezpieczeństwo, „Bez kategorii”) **zbudowana i przetestowana przez użytkownika – wszystko działa** (2026-09-27).
 
+- **Powiadomienia o cenach przez GitHub Actions + ntfy działają** (2026-09-27): sekret `NTFY_TOPIC` ustawiony, testowe powiadomienie dotarło na telefon. Pełne sprawdzenie pobrało ceny wszystkich 9 instrumentów z `alerts.json` (Yahoo + CoinGecko działają z serwerów GitHuba). Jedno uruchomienie trwa ok. 40 s z kompilacją z cache.
+
 ## Następne (propozycje po MVP)
 
 - Zweryfikować źródła RSS na prawdziwej sieci i ustawić `"verified": true` (lub podmienić niedziałające).
@@ -91,7 +93,7 @@ _Ostatnia aktualizacja: 2026-09-27_
 8. **Po `git pull` uruchom `xcodegen`** (doszły nowe pliki widoków) i sprawdź nowe funkcje: chip „+ Dodaj” (własna kategoria), przytrzymanie newsa → „Ignoruj podobne…”, zakładka przy każdym newsie, zielony ✓ i archiwum na liście „Do przeczytania”, Rynki → Archiwum alertów, wyszukiwarka „URNU” w edytorze instrumentu.
 9. **Rynki:** w zakładce Rynki pociągnij listę w dół. Przy każdym instrumencie powinna pojawić się cena. Dodaj własny instrument i użyj „Sprawdź symbol”. Włącz powiadomienia i wyślij testowe (Ustawienia → Powiadomienia o cenach). Sprawdzanie w tle przetestujesz w Xcode: zatrzymaj aplikację debuggerem i w konsoli LLDB wpisz
    `e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.example.newstracker.pricecheck"]`.
-10. **Powiadomienia bez aplikacji (po scaleniu PR do `main`):** zainstaluj ntfy na iPhonie i zasubskrybuj losowy temat, dodaj sekret `NTFY_TOPIC` w GitHub (Settings → Secrets and variables → Actions), potem Actions → Price watch → Run workflow z opcją testu. Szczegóły w README („Rynki”).
+10. ~~**Powiadomienia bez aplikacji**~~ – zrobione (PR #2, test OK). Zmiana listy instrumentów: wyeksportuj `alerts.json` z aplikacji i podmień plik w repo. Dawne kroki: zainstaluj ntfy na iPhonie i zasubskrybuj losowy temat, dodaj sekret `NTFY_TOPIC` w GitHub (Settings → Secrets and variables → Actions), potem Actions → Price watch → Run workflow z opcją testu. Szczegóły w README („Rynki”).
 11. (Opcjonalnie) Dodaj ikonę aplikacji 1024×1024 w `NewsTrackerApp/Resources/Assets.xcassets/AppIcon.appiconset`.
 
 ## Informacje dla kolejnej sesji

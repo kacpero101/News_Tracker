@@ -31,10 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Cache Swift build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: NewsCore/.build
           key: price-watch-build-${{ runner.os }}-${{ hashFiles('NewsCore/Package.swift', 'NewsCore/Sources/**') }}
@@ -43,7 +43,7 @@ jobs:
       # The time of the previous check is kept in the Actions cache, so every move is
       # reported once. Cache entries are immutable, hence a new key per run.
       - name: Restore watcher state
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: .price-watch-state
           key: price-watch-state-${{ github.run_id }}
@@ -71,7 +71,7 @@ jobs:
 
       - name: Save watcher state
         if: ${{ !inputs.test && success() }}
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: .price-watch-state
           key: price-watch-state-${{ github.run_id }}
