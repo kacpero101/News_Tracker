@@ -1,28 +1,157 @@
 {
-  "assets": [
+  "assets" : [
     {
-      "id": "btc", "name": "Bitcoin", "symbol": "bitcoin", "kind": "crypto", "provider": "coingecko", "currency": "usd",
-      "rules": [ { "windowHours": 48, "thresholdPercent": 8, "direction": "both" }, { "windowHours": 4, "thresholdPercent": 5, "direction": "both" } ]
+      "currency" : "usd",
+      "id" : "btc",
+      "kind" : "crypto",
+      "name" : "Bitcoin",
+      "provider" : "coingecko",
+      "rules" : [
+        {
+          "direction" : "both",
+          "id" : "48h-8pct-both",
+          "isEnabled" : true,
+          "thresholdPercent" : 9,
+          "windowHours" : 48
+        },
+        {
+          "direction" : "both",
+          "id" : "4h-5pct-both",
+          "isEnabled" : true,
+          "thresholdPercent" : 5,
+          "windowHours" : 4
+        }
+      ],
+      "symbol" : "bitcoin"
     },
     {
-      "id": "eth", "name": "Ethereum", "symbol": "ethereum", "kind": "crypto", "provider": "coingecko", "currency": "usd",
-      "rules": [ { "windowHours": 24, "thresholdPercent": 10, "direction": "both" } ]
+      "currency" : "usd",
+      "id" : "eth",
+      "kind" : "crypto",
+      "name" : "Ethereum",
+      "provider" : "coingecko",
+      "rules" : [
+        {
+          "direction" : "both",
+          "id" : "24h-10pct-both",
+          "isEnabled" : true,
+          "thresholdPercent" : 10,
+          "windowHours" : 24
+        }
+      ],
+      "symbol" : "ethereum"
     },
     {
-      "id": "spy", "name": "S&P 500 ETF (SPY)", "symbol": "SPY", "kind": "etf", "provider": "yahoo",
-      "rules": [ { "windowHours": 24, "thresholdPercent": 3, "direction": "both" } ]
+      "id" : "spy",
+      "kind" : "etf",
+      "name" : "S&P 500 ETF (SPY)",
+      "provider" : "yahoo",
+      "rules" : [
+        {
+          "direction" : "both",
+          "id" : "24h-3pct-both",
+          "isEnabled" : true,
+          "thresholdPercent" : 3,
+          "windowHours" : 24
+        }
+      ],
+      "symbol" : "SPY"
     },
     {
-      "id": "qqq", "name": "Nasdaq-100 ETF (QQQ)", "symbol": "QQQ", "kind": "etf", "provider": "yahoo",
-      "rules": [ { "windowHours": 24, "thresholdPercent": 4, "direction": "both" } ]
+      "id" : "qqq",
+      "kind" : "etf",
+      "name" : "Nasdaq-100 ETF (QQQ)",
+      "provider" : "yahoo",
+      "rules" : [
+        {
+          "direction" : "both",
+          "id" : "24h-4pct-both",
+          "isEnabled" : true,
+          "thresholdPercent" : 4,
+          "windowHours" : 24
+        }
+      ],
+      "symbol" : "QQQ"
     },
     {
-      "id": "aapl", "name": "Apple", "symbol": "AAPL", "kind": "stock", "provider": "yahoo",
-      "rules": [ { "windowHours": 48, "thresholdPercent": 7, "direction": "both" } ]
+      "id" : "aapl",
+      "kind" : "stock",
+      "name" : "Apple",
+      "provider" : "yahoo",
+      "rules" : [
+        {
+          "direction" : "both",
+          "id" : "48h-7pct-both",
+          "isEnabled" : true,
+          "thresholdPercent" : 7,
+          "windowHours" : 48
+        }
+      ],
+      "symbol" : "AAPL"
     },
     {
-      "id": "pkn", "name": "Orlen (GPW)", "symbol": "PKN.WA", "kind": "stock", "provider": "yahoo",
-      "rules": [ { "windowHours": 48, "thresholdPercent": 7, "direction": "down" } ]
+      "id" : "pkn",
+      "kind" : "stock",
+      "name" : "Orlen (GPW)",
+      "provider" : "yahoo",
+      "rules" : [
+        {
+          "direction" : "down",
+          "id" : "48h-7pct-down",
+          "isEnabled" : true,
+          "thresholdPercent" : 7,
+          "windowHours" : 48
+        }
+      ],
+      "symbol" : "PKN.WA"
+    },
+    {
+      "id" : "yahoo:urnu.de",
+      "kind" : "etf",
+      "name" : "Global X Uranium UCITS ETF USD Acc",
+      "provider" : "yahoo",
+      "rules" : [
+        {
+          "direction" : "both",
+          "id" : "24h-5pct-both",
+          "isEnabled" : true,
+          "thresholdPercent" : 5,
+          "windowHours" : 24
+        }
+      ],
+      "symbol" : "URNU.DE"
+    },
+    {
+      "id" : "yahoo:wig20.wa",
+      "kind" : "index",
+      "name" : "WIG20",
+      "provider" : "yahoo",
+      "rules" : [
+        {
+          "direction" : "both",
+          "id" : "24h-5pct-both",
+          "isEnabled" : true,
+          "thresholdPercent" : 5,
+          "windowHours" : 24
+        }
+      ],
+      "symbol" : "WIG20.WA"
+    },
+    {
+      "id" : "yahoo:nucl",
+      "kind" : "stock",
+      "name" : "NUCL",
+      "provider" : "yahoo",
+      "rules" : [
+        {
+          "direction" : "both",
+          "id" : "24h-5pct-both",
+          "isEnabled" : true,
+          "thresholdPercent" : 5,
+          "windowHours" : 24
+        }
+      ],
+      "symbol" : "NUCL"
     }
   ]
 }
