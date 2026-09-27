@@ -31,6 +31,9 @@ final class NewsStore {
 
     private(set) var readingList: [Article] = []
     private(set) var savedIDs: Set<String> = []
+    /// Archive of news marked as read (newest first).
+    private(set) var readArchive: [ReadArticle] = []
+    private(set) var readIDs: Set<String> = []
     /// Category filter of the reading list (empty = all).
     var readingListTopics: Set<Topic> = []
 
@@ -73,6 +76,7 @@ final class NewsStore {
 
     private let repository: NewsRepository
     private let readingListStore: ReadingList
+    private let readArchiveStore: ReadArchive
     private let baseKeywords: KeywordList
     private let categoriesStore: JSONFileStore<[CustomCategory]>?
     private let muteStore: JSONFileStore<MuteList>?
@@ -123,6 +127,9 @@ final class NewsStore {
         readingListStore = ReadingList(
             store: directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("reading-list.json")) }
         )
+        readArchiveStore = ReadArchive(
+            store: directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("read-archive.json")) }
+        )
 
         customCategories = categories
         muteList = mutes
@@ -139,6 +146,7 @@ final class NewsStore {
     func start() async {
         articles = await repository.cachedArticles()
         await reloadReadingList()
+        await reloadReadArchive()
         let isStale = lastRefresh.map { Date().timeIntervalSince($0) > staleInterval } ?? true
         if articles.isEmpty || isStale {
             await refresh()
@@ -227,7 +235,9 @@ final class NewsStore {
         let managed = Set((previous + customCategories).map(\.topic))
         articles = await repository.applyClassifier(classifier, managing: managed)
         try? await readingListStore.reclassify(with: classifier, managing: managed)
+        try? await readArchiveStore.reclassify(with: classifier, managing: managed)
         await reloadReadingList()
+        await reloadReadArchive()
 
         // Forget filter selections of deleted categories.
         let valid = Set(allTopics)
@@ -293,11 +303,76 @@ final class NewsStore {
 
     func toggleSaved(_ article: Article) async {
         do {
-            try await readingListStore.toggle(article)
+            let nowSaved = try await readingListStore.toggle(article)
+            // Saving an already read article puts it back on the reading list.
+            if nowSaved && readIDs.contains(article.id) {
+                try await readArchiveStore.remove(ids: [article.id])
+            }
         } catch {
             errorMessage = "Nie udało się zapisać listy: \(error.localizedDescription)"
         }
         await reloadReadingList()
+        await reloadReadArchive()
+    }
+
+    // MARK: Read archive
+
+    func isRead(_ article: Article) -> Bool {
+        readIDs.contains(article.id)
+    }
+
+    /// Moves the article to the archive of read news (and off the reading list).
+    func markRead(_ article: Article) async {
+        do {
+            try await readArchiveStore.markRead(article)
+            if savedIDs.contains(article.id) {
+                try await readingListStore.remove(id: article.id)
+            }
+        } catch {
+            errorMessage = "Nie udało się oznaczyć jako przeczytany: \(error.localizedDescription)"
+        }
+        await reloadReadingList()
+        await reloadReadArchive()
+    }
+
+    /// Removes the "read" mark without adding the article back to the reading list.
+    func markUnread(_ article: Article) async {
+        await deleteFromArchive(ids: [article.id])
+    }
+
+    /// Moves an archived article back to the reading list.
+    func restoreToReadingList(_ entry: ReadArticle) async {
+        do {
+            try await readArchiveStore.remove(ids: [entry.id])
+            try await readingListStore.add(entry.article)
+        } catch {
+            errorMessage = "Nie udało się przywrócić: \(error.localizedDescription)"
+        }
+        await reloadReadingList()
+        await reloadReadArchive()
+    }
+
+    func deleteFromArchive(ids: Set<String>) async {
+        do {
+            try await readArchiveStore.remove(ids: ids)
+        } catch {
+            errorMessage = "Nie udało się usunąć z archiwum: \(error.localizedDescription)"
+        }
+        await reloadReadArchive()
+    }
+
+    func clearReadArchive() async {
+        do {
+            try await readArchiveStore.clear()
+        } catch {
+            errorMessage = "Nie udało się wyczyścić archiwum: \(error.localizedDescription)"
+        }
+        await reloadReadArchive()
+    }
+
+    private func reloadReadArchive() async {
+        readArchive = await readArchiveStore.all
+        readIDs = Set(readArchive.map(\.id))
     }
 
     private func reloadReadingList() async {

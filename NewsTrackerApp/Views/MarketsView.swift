@@ -41,16 +41,14 @@ struct MarketsView: View {
                 }
 
                 if !market.recentAlerts.isEmpty {
-                    Section {
-                        ForEach(market.recentAlerts.prefix(20)) { record in
+                    Section("Ostatnie alerty") {
+                        ForEach(market.recentAlerts.prefix(5)) { record in
                             AlertRecordRow(record: record)
                         }
-                    } header: {
-                        HStack {
-                            Text("Ostatnie alerty")
-                            Spacer()
-                            Button("Wyczyść") { market.clearAlerts() }
-                                .font(.caption)
+                        NavigationLink {
+                            PriceAlertsArchiveView()
+                        } label: {
+                            Label("Archiwum alertów (\(market.recentAlerts.count))", systemImage: "archivebox")
                         }
                     }
                 }
@@ -174,8 +172,10 @@ private struct RuleStatusRow: View {
     }
 }
 
-private struct AlertRecordRow: View {
+struct AlertRecordRow: View {
     let record: AlertRecord
+    /// In the archive the day is in the section header, so only the time is shown.
+    var showsDay = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -185,9 +185,15 @@ private struct AlertRecordRow: View {
                 Text(record.title).font(.subheadline.bold())
             }
             Text(record.body).font(.caption).foregroundStyle(.secondary)
-            Text(record.date, format: .dateTime.day().month().hour().minute())
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            Group {
+                if showsDay {
+                    Text(record.date, format: .dateTime.day().month().hour().minute())
+                } else {
+                    Text(record.date, format: .dateTime.hour().minute())
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
         }
     }
 }

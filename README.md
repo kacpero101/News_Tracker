@@ -6,7 +6,10 @@ Natywna aplikacja iOS (Swift/SwiftUI), która zbiera newsy z darmowych kanałów
 - klasyfikacja offline: kategoria źródła + słowa kluczowe (PL/EN/DE),
 - deduplikacja tego samego artykułu z wielu kanałów,
 - lista najnowszych newsów, filtry tematów i języków, wyszukiwarka, pull-to-refresh,
-- lista „Do przeczytania”, oryginał otwierany w `SFSafariViewController`,
+- przycisk „Do przeczytania” (zakładka) przy każdym newsie, lista „Do przeczytania” z filtrem kategorii, oznaczanie jako **przeczytany** i **archiwum przeczytanych** (nie liczą się do listy „Do przeczytania”),
+- **własne kategorie** (chip „+” obok wbudowanych: nazwa, słowa kluczowe, ikona, kolor),
+- **„Ignoruj podobne”**: ukrywanie newsów z wybranymi słowami z nagłówka (z odmianami), pojedyncze ukrywanie newsa,
+- oryginał otwierany w `SFSafariViewController`,
 - opcjonalnie (domyślnie wyłączone): klasyfikacja i streszczenia przez Claude API z kluczem w Keychain,
 - **Rynki**: śledzenie akcji/ETF/kryptowalut i powiadomienia o nagłych zmianach cen (np. BTC: ±8% w 48 h) – lokalnie na iPhonie oraz darmowo przez GitHub Actions + ntfy.
 
@@ -79,6 +82,12 @@ swift test
 ```
 Można też otworzyć `NewsCore/Package.swift` w Xcode i uruchomić testy (**⌘U**). Testy nie korzystają z sieci (fixtures w `Tests/NewsCoreTests/Fixtures`).
 
+## Newsy: kategorie, ignorowanie, przeczytane
+
+- **Własne kategorie:** na końcu paska kategorii jest chip **„+ Dodaj”**. Podajesz nazwę, słowa kluczowe (przecinkami; `dron*` dopasowuje odmiany; słowa działają dla wszystkich języków), ikonę i kolor. Już pobrane i zapisane newsy są od razu przypisywane. Przytrzymanie chipa własnej kategorii → edycja lub usunięcie. Lista również w Ustawienia → Kategorie.
+- **Ignoruj podobne:** przytrzymaj news (albo przesuń w prawo) → „Ignoruj podobne…”. Wybierasz słowa z nagłówka (np. „przejeździe” → `przejeźdz*`) albo wpisujesz własne; newsy z tymi słowami znikają z listy. „Ukryj ten news” ukrywa pojedynczy news. Zarządzanie: Ustawienia → Ignorowane słowa.
+- **Do przeczytania:** ikona zakładki przy każdym newsie. Na liście „Do przeczytania” zielony ✓ (lub przesunięcie w prawo) oznacza news jako **przeczytany**: znika z listy i trafia do **archiwum przeczytanych** (ikona archiwum w lewym górnym rogu). Z archiwum można przywrócić news do przeczytania, wyszukiwać i czyścić archiwum. Przeczytane newsy na liście Newsy mają przyciemniony tytuł i ✓.
+
 ## Konfiguracja
 
 ### Źródła – `NewsCore/Sources/NewsCore/Resources/sources.json`
@@ -120,7 +129,9 @@ Zakładka **Rynki** pokazuje obserwowane instrumenty (akcje, ETF-y, kryptowaluty
 - **Yahoo Finance**: akcje, ETF-y, indeksy (np. `AAPL`, `SPY`, `PKN.WA`, `CDR.WA`, `SAP.DE`, `BTC-USD`). To nieoficjalny endpoint i może się zmienić.
 - **CoinGecko**: kryptowaluty po ID monety (`bitcoin`, `ethereum`), waluta USD/EUR/PLN.
 
-Dodawanie i edycja: przycisk **+** w zakładce Rynki lub dotknięcie instrumentu. Przycisk „Sprawdź symbol” weryfikuje, czy dane są dostępne.
+Dodawanie i edycja: przycisk **+** w zakładce Rynki lub dotknięcie instrumentu. **Wyszukiwarka** w edytorze (np. „uranium”, „URNU”) pokazuje symbole z giełdami. Instrumenty spoza USA mają w Yahoo sufiks giełdy (`.L` Londyn, `.DE` Xetra, `.AS`, `.MI`, `.WA`), więc sam symbol (np. `URNU`) nie wystarczy. Przycisk „Sprawdź symbol” weryfikuje dostępność danych, a przy nieznanym symbolu sam uruchamia wyszukiwanie.
+
+Wszystkie wykryte alerty trafiają do **archiwum alertów** (Rynki → „Archiwum alertów”): pogrupowane po dniach, z filtrem instrumentu. Dotknięcie alertu otwiera notowania.
 
 ### Powiadomienia – dwa darmowe sposoby
 

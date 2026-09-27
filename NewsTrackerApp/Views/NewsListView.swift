@@ -20,9 +20,9 @@ struct NewsListView: View {
                     FailuresBanner(failures: store.failures)
                 }
                 ForEach(store.filteredArticles) { article in
-                    ArticleListRow(article: article, presentedArticle: $presentedArticle) { article in
+                    ArticleListRow(article: article, presentedArticle: $presentedArticle, onIgnoreSimilar: { article in
                         articleToMute = article
-                    }
+                    })
                 }
                 if store.hiddenCount > 0 {
                     NavigationLink {
@@ -117,20 +117,36 @@ struct NewsListView: View {
     }
 }
 
-/// A row with tap-to-open, a "read later" button, swipe actions and a context menu.
+/// A row with tap-to-open, "read later" / "read" buttons, swipe actions and a context menu.
 struct ArticleListRow: View {
+    enum Context {
+        case news, readingList
+    }
+
     @Environment(NewsStore.self) private var store
     @Environment(\.openURL) private var openURL
     let article: Article
     @Binding var presentedArticle: Article?
+    var context: Context = .news
     /// Enables "ignore similar" and "hide" actions (news list only).
     var onIgnoreSimilar: ((Article) -> Void)?
 
+    /// "Mark as read" button action, shown on the reading list only.
+    private var markReadAction: (() -> Void)? {
+        guard context == .readingList else { return nil }
+        return { Task { await store.markRead(article) } }
+    }
+
     var body: some View {
         let saved = store.isSaved(article)
-        ArticleRow(article: article, isSaved: saved) {
-            Task { await store.toggleSaved(article) }
-        }
+        let read = store.isRead(article)
+        ArticleRow(
+            article: article,
+            isSaved: saved,
+            onToggleSaved: { Task { await store.toggleSaved(article) } },
+            isRead: context == .news && read,
+            onMarkRead: markReadAction
+        )
         .onTapGesture {
             presentedArticle = article
         }
@@ -146,7 +162,14 @@ struct ArticleListRow: View {
             .tint(saved ? Color.gray : Color.accentColor)
         }
         .swipeActions(edge: .leading) {
-            if let onIgnoreSimilar {
+            if context == .readingList {
+                Button {
+                    Task { await store.markRead(article) }
+                } label: {
+                    Label("Przeczytane", systemImage: "checkmark.circle")
+                }
+                .tint(.green)
+            } else if let onIgnoreSimilar {
                 Button {
                     onIgnoreSimilar(article)
                 } label: {
@@ -160,6 +183,19 @@ struct ArticleListRow: View {
                 Task { await store.toggleSaved(article) }
             } label: {
                 Label(saved ? "Usuń z listy" : "Zapisz do przeczytania", systemImage: saved ? "bookmark.slash" : "bookmark")
+            }
+            if read {
+                Button {
+                    Task { await store.markUnread(article) }
+                } label: {
+                    Label("Oznacz jako nieprzeczytany", systemImage: "circle")
+                }
+            } else {
+                Button {
+                    Task { await store.markRead(article) }
+                } label: {
+                    Label("Oznacz jako przeczytany", systemImage: "checkmark.circle")
+                }
             }
             if let onIgnoreSimilar {
                 Button {

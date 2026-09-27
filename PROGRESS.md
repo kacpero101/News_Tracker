@@ -6,12 +6,13 @@ _Ostatnia aktualizacja: 2026-09-27_
 
 1. ✅ Szkielet repo: `.gitignore`, `PROGRESS.md`, `DECISIONS.md`, `README.md`.
 2. ✅ `NewsCore` (Swift Package, bez UI): modele, parser RSS 2.0 / RSS 1.0 / Atom, czyszczenie HTML i daty, klasyfikator słów kluczowych, deduplikacja, filtrowanie i wyszukiwanie, równoległe pobieranie z izolacją błędów, cache JSON, lista „do przeczytania”, konfiguracja `sources.json` / `keywords.json`.
-3. ✅ Testy jednostkowe na fixtures (bez sieci) – **70 testów, wszystkie przechodzą** (`swift test`, Swift 6.2.4, Linux).
+3. ✅ Testy jednostkowe na fixtures (bez sieci) – **86 testów, wszystkie przechodzą** (`swift test`, Swift 6.2.4, Linux).
 4. ✅ Aplikacja iOS (SwiftUI, iOS 17) + `project.yml` (XcodeGen).
 5. ✅ README z instrukcją krok po kroku.
 6. ✅ Etap opcjonalny: Claude API (domyślnie wyłączone, klucz w Keychain, testy tylko na mockach).
 7. ✅ Pull Request do `main`: https://github.com/kacpero101/News_Tracker/pull/1
-8. ✅ Rynki: śledzenie cen akcji/ETF/krypto, reguły „zmiana ≥ X% w ciągu N h”, powiadomienia lokalne + GitHub Actions/ntfy. **70 testów przechodzi.**
+8. ✅ Rynki: śledzenie cen akcji/ETF/krypto, reguły „zmiana ≥ X% w ciągu N h”, powiadomienia lokalne + GitHub Actions/ntfy.
+9. ✅ Po testach na symulatorze: własne kategorie, „Ignoruj podobne”, przycisk „Do przeczytania” przy każdym newsie, kategorie na liście „Do przeczytania”, oznaczanie jako przeczytany + archiwum przeczytanych, archiwum alertów, wyszukiwarka instrumentów (URNU/URNX), poprawka błędnych kategorii „Finanse”. **86 testów przechodzi.**
 
 ## Zrobione
 
@@ -34,6 +35,8 @@ _Ostatnia aktualizacja: 2026-09-27_
   - `NtfyNotifier`, `PriceWatchRunner` (wspólny dla aplikacji i CLI), CLI `price-watch` (`--dry-run`, `--test`, `--state`),
   - workflow `.github/workflows/price-watch.yml` (co godzinę, cache kompilacji i stanu).
 - **Aplikacja:** zakładka „Rynki” (ceny, zmiana w oknie każdej reguły, ostatnie alerty), edytor instrumentu i reguł ze sprawdzaniem symbolu, lokalne powiadomienia, `BGAppRefreshTask`, ekran „Powiadomienia o cenach” z instrukcją ntfy i eksportem `alerts.json`.
+
+- **Nowe funkcje (runda 2):** `Topic` jako typ otwarty + `CustomCategory`, `MuteList`/`SimilarNewsSuggester`, `ReadArchive` + `DayGrouping`, `YahooSymbolSearch`. W aplikacji: `TopicCatalog`, `TopicChips` (Newsy i „Do przeczytania”), `CategoryEditorView`, `IgnoreSimilarView`/`MutedNewsView`/`CategoriesSettingsView`, `ReadArchiveView`, `PriceAlertsArchiveView`, wyszukiwarka w `AssetEditorView`.
 
 ## Następne (propozycje po MVP)
 
@@ -79,10 +82,11 @@ _Ostatnia aktualizacja: 2026-09-27_
    Działające oznacz `"verified": true`; niedziałające popraw lub usuń. W aplikacji niedziałające źródła są też widoczne w banerze „Niedostępne źródła” i w Ustawienia → Kanały RSS.
 5. **Sprawdź na urządzeniu/symulatorze:** pull-to-refresh, filtry tematów i języków, wyszukiwanie (np. „inflacja”, „bitcoin”), swipe „Do przeczytania”, otwieranie artykułu w Safari, wyłączenie źródła w Ustawieniach.
 6. (Opcjonalnie) **AI:** wpisz własny klucz API Anthropic w Ustawienia → AI, włącz przełącznik, odśwież listę – przy artykułach pojawi się streszczenie z ikoną ✨. Pamiętaj, że wywołania są płatne; w tej sesji nie wykonano żadnego prawdziwego wywołania API.
-7. **Rynki:** w zakładce Rynki pociągnij listę w dół. Przy każdym instrumencie powinna pojawić się cena. Dodaj własny instrument i użyj „Sprawdź symbol”. Włącz powiadomienia i wyślij testowe (Ustawienia → Powiadomienia o cenach). Sprawdzanie w tle przetestujesz w Xcode: zatrzymaj aplikację debuggerem i w konsoli LLDB wpisz
+7. **Po `git pull` uruchom `xcodegen`** (doszły nowe pliki widoków) i sprawdź nowe funkcje: chip „+ Dodaj” (własna kategoria), przytrzymanie newsa → „Ignoruj podobne…”, zakładka przy każdym newsie, zielony ✓ i archiwum na liście „Do przeczytania”, Rynki → Archiwum alertów, wyszukiwarka „URNU” w edytorze instrumentu.
+8. **Rynki:** w zakładce Rynki pociągnij listę w dół. Przy każdym instrumencie powinna pojawić się cena. Dodaj własny instrument i użyj „Sprawdź symbol”. Włącz powiadomienia i wyślij testowe (Ustawienia → Powiadomienia o cenach). Sprawdzanie w tle przetestujesz w Xcode: zatrzymaj aplikację debuggerem i w konsoli LLDB wpisz
    `e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.example.newstracker.pricecheck"]`.
-8. **Powiadomienia bez aplikacji (po scaleniu PR do `main`):** zainstaluj ntfy na iPhonie i zasubskrybuj losowy temat, dodaj sekret `NTFY_TOPIC` w GitHub (Settings → Secrets and variables → Actions), potem Actions → Price watch → Run workflow z opcją testu. Szczegóły w README („Rynki”).
-9. (Opcjonalnie) Dodaj ikonę aplikacji 1024×1024 w `NewsTrackerApp/Resources/Assets.xcassets/AppIcon.appiconset`.
+9. **Powiadomienia bez aplikacji (po scaleniu PR do `main`):** zainstaluj ntfy na iPhonie i zasubskrybuj losowy temat, dodaj sekret `NTFY_TOPIC` w GitHub (Settings → Secrets and variables → Actions), potem Actions → Price watch → Run workflow z opcją testu. Szczegóły w README („Rynki”).
+10. (Opcjonalnie) Dodaj ikonę aplikacji 1024×1024 w `NewsTrackerApp/Resources/Assets.xcassets/AppIcon.appiconset`.
 
 ## Informacje dla kolejnej sesji
 

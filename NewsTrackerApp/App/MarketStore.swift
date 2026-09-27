@@ -2,7 +2,7 @@ import Foundation
 import NewsCore
 import Observation
 
-/// A delivered alert kept for the "Recent alerts" list.
+/// A detected price alert kept in the alerts archive.
 struct AlertRecord: Codable, Identifiable, Hashable {
     var id: String
     var assetID: String
@@ -10,6 +10,16 @@ struct AlertRecord: Codable, Identifiable, Hashable {
     var body: String
     var date: Date
     var isRise: Bool
+    // Added later – optional so older archives still decode.
+    var assetName: String?
+    var changePercent: Double?
+    var quoteURL: URL?
+}
+
+/// An instrument that appears in the alerts archive (for filtering).
+struct AlertAssetOption: Identifiable, Hashable {
+    var id: String
+    var name: String
 }
 
 /// Watchlist, latest prices and price alerts.
@@ -20,6 +30,7 @@ final class MarketStore {
     private(set) var assets: [WatchedAsset] = []
     private(set) var series: [String: PriceSeries] = [:]
     private(set) var failures: [String: String] = [:]
+    /// Alerts archive, newest first (up to `alertsLimit`).
     private(set) var recentAlerts: [AlertRecord] = []
     private(set) var isChecking = false
     private(set) var lastCheck: Date?
@@ -34,6 +45,7 @@ final class MarketStore {
     private let defaults: UserDefaults
     private let runner = PriceWatchRunner()
     private let notifier = LocalNotifier()
+    private let alertsLimit = 1000
 
     private enum Keys {
         static let notificationsEnabled = "priceNotificationsEnabled"
@@ -92,16 +104,40 @@ final class MarketStore {
                 title: PriceAlertFormatter.title(for: $0),
                 body: PriceAlertFormatter.body(for: $0),
                 date: $0.move.to.date,
-                isRise: $0.move.isRise
+                isRise: $0.move.isRise,
+                assetName: $0.asset.name,
+                changePercent: $0.move.changePercent,
+                quoteURL: $0.asset.quoteURL
             )
         }
-        recentAlerts = Array((records + recentAlerts).prefix(50))
+        let existing = Set(recentAlerts.map(\.id))
+        recentAlerts = Array((records.filter { !existing.contains($0.id) } + recentAlerts).prefix(alertsLimit))
         try? alertsStore?.save(recentAlerts)
     }
 
     func clearAlerts() {
         recentAlerts = []
         try? alertsStore?.delete()
+    }
+
+    func deleteAlerts(ids: Set<String>) {
+        recentAlerts.removeAll { ids.contains($0.id) }
+        try? alertsStore?.save(recentAlerts)
+    }
+
+    /// Instruments present in the archive, in order of their latest alert.
+    var alertAssets: [AlertAssetOption] {
+        var seen = Set<String>()
+        return recentAlerts.compactMap { record in
+            guard seen.insert(record.assetID).inserted else { return nil }
+            let name = record.assetName ?? asset(withID: record.assetID)?.name ?? record.assetID
+            return AlertAssetOption(id: record.assetID, name: name)
+        }
+    }
+
+    /// Link to the quote page (also for alerts saved before links were stored).
+    func quoteURL(for record: AlertRecord) -> URL? {
+        record.quoteURL ?? asset(withID: record.assetID)?.quoteURL
     }
 
     // MARK: Notifications

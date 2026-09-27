@@ -2,11 +2,15 @@ import NewsCore
 import SwiftUI
 
 /// Headline, short description, source, date and topics of one article,
-/// with a "read later" button in the top-right corner.
+/// with a "read later" button (and optionally a "mark as read" button) in the top-right corner.
 struct ArticleRow: View {
     let article: Article
     let isSaved: Bool
     let onToggleSaved: () -> Void
+    /// Dims the headline of news already marked as read.
+    var isRead = false
+    /// Shows a "mark as read" button (reading list).
+    var onMarkRead: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -21,7 +25,23 @@ struct ArticleRow: View {
                 } else {
                     Text("brak daty")
                 }
+                if isRead {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Color.green)
+                        .accessibilityLabel("Przeczytane")
+                }
                 Spacer(minLength: 0)
+                if let onMarkRead {
+                    Button(action: onMarkRead) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.body)
+                            .foregroundStyle(Color.green)
+                            .frame(width: 36, height: 28, alignment: .trailing)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Oznacz jako przeczytany")
+                }
                 Button(action: onToggleSaved) {
                     Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
                         .font(.body)
@@ -37,7 +57,7 @@ struct ArticleRow: View {
 
             Text(article.title)
                 .font(.headline)
-                .foregroundStyle(.primary)
+                .foregroundStyle(isRead ? Color.secondary : Color.primary)
                 .multilineTextAlignment(.leading)
 
             if let aiSummary = article.aiSummary {

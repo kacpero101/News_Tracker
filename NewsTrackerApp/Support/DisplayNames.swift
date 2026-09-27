@@ -70,3 +70,12 @@ extension Language {
         }
     }
 }
+
+/// Section titles for archives: "Dziś", "Wczoraj", "2 maja 2024".
+enum DayTitle {
+    static func string(for day: Date, calendar: Calendar = .current) -> String {
+        if calendar.isDateInToday(day) { return "Dziś" }
+        if calendar.isDateInYesterday(day) { return "Wczoraj" }
+        return day.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "pl_PL")))
+    }
+}
