@@ -60,5 +60,5 @@ Każda decyzja: **co** + **dlaczego**. Nowe decyzje dopisuj na końcu.
 ## Proces
 
 21. **Branch:** praca na `claude/keen-goodall-cj91f0` (branch wyznaczony dla tej sesji) zamiast `feature/mvp`.
-22. **Repozytorium było puste (brak `main`).** Utworzenie `main` przez push zostało zablokowane przez uprawnienia sesji, a push brancha zwrócił 403 (brak dostępu aplikacji Claude GitHub do repo). Commity są lokalne – patrz „Do zrobienia lokalnie” w `PROGRESS.md`.
+22. **Repozytorium było puste (brak `main`).** Utworzono `main` z commitem startowym (`.gitignore` + README) i scalono go do brancha MVP strategią `ours` (bez przepisywania historii), aby PR miał wspólną historię z `main`. `main` jest domyślnym branchem.
 23. **Toolchain Swift w chmurze:** `download.swift.org` zablokowany przez proxy, więc Swift 6.2.4 został rozpakowany z oficjalnego obrazu Docker `swift:6.2.4-noble` (do `/opt/swiftroot`, poza repo).

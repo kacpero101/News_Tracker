@@ -10,7 +10,7 @@ _Ostatnia aktualizacja: 2026-09-27_
 4. ✅ Aplikacja iOS (SwiftUI, iOS 17) + `project.yml` (XcodeGen).
 5. ✅ README z instrukcją krok po kroku.
 6. ✅ Etap opcjonalny: Claude API (domyślnie wyłączone, klucz w Keychain, testy tylko na mockach).
-7. ⛔ Push i Pull Request do `main` – zablokowane (brak dostępu do GitHub z tej sesji, patrz „Znane problemy”).
+7. ✅ Pull Request do `main`: https://github.com/kacpero101/News_Tracker/pull/1
 
 ## Zrobione
 
@@ -37,7 +37,6 @@ _Ostatnia aktualizacja: 2026-09-27_
 
 ## Znane problemy
 
-- **Push na GitHub nie działa z tej sesji**: `git push` zwraca 403 („Claude doesn't have GitHub access to kacpero101/News_Tracker”). Dodatkowo repozytorium było puste (brak `main`), a utworzenie `main` zostało zablokowane przez uprawnienia sesji. Wszystkie commity są na lokalnym branchu `claude/keen-goodall-cj91f0`. PR nie mógł zostać otwarty.
 - **Kod aplikacji SwiftUI nie był kompilowany** (brak Xcode/SDK iOS w chmurze). Pisany ostrożnie pod iOS 17, ale możliwe drobne błędy kompilacji – do sprawdzenia w Xcode.
 - **Źródła RSS niezweryfikowane** – proxy chmury blokuje domeny wydawców (`verified: false` dla wszystkich). Niektóre adresy (szczególnie polskie: Rzeczpospolita, Polsat News, TVN24, Nauka w Polsce) mogą wymagać poprawki.
 - Klasyfikacja słowami kluczowymi jest heurystyczna – możliwe fałszywe trafienia (np. „bank” w kontekście innym niż finanse).
@@ -45,9 +44,7 @@ _Ostatnia aktualizacja: 2026-09-27_
 
 ## Do zrobienia lokalnie (na Macu)
 
-1. **Wypchnij pracę na GitHub** (jeśli ta sesja nie zdołała):
-   - połącz/odnów dostęp GitHub dla Claude (https://claude.ai/connect-github) i zainstaluj aplikację Claude GitHub na repo, albo
-   - wypchnij ręcznie z kopii zawierającej te commity. Repo jest puste, więc najpierw utwórz `main` (np. pusty commit z README przez GitHub UI), potem `git push -u origin claude/keen-goodall-cj91f0` i otwórz PR do `main`.
+1. **Przejrzyj i scal PR** https://github.com/kacpero101/News_Tracker/pull/1 (po sprawdzeniu poniższych punktów).
 2. **Zbuduj aplikację:**
    ```bash
    brew install xcodegen
