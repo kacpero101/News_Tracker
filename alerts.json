@@ -1,0 +1,28 @@
+{
+  "assets": [
+    {
+      "id": "btc", "name": "Bitcoin", "symbol": "bitcoin", "kind": "crypto", "provider": "coingecko", "currency": "usd",
+      "rules": [ { "windowHours": 48, "thresholdPercent": 8, "direction": "both" }, { "windowHours": 4, "thresholdPercent": 5, "direction": "both" } ]
+    },
+    {
+      "id": "eth", "name": "Ethereum", "symbol": "ethereum", "kind": "crypto", "provider": "coingecko", "currency": "usd",
+      "rules": [ { "windowHours": 24, "thresholdPercent": 10, "direction": "both" } ]
+    },
+    {
+      "id": "spy", "name": "S&P 500 ETF (SPY)", "symbol": "SPY", "kind": "etf", "provider": "yahoo",
+      "rules": [ { "windowHours": 24, "thresholdPercent": 3, "direction": "both" } ]
+    },
+    {
+      "id": "qqq", "name": "Nasdaq-100 ETF (QQQ)", "symbol": "QQQ", "kind": "etf", "provider": "yahoo",
+      "rules": [ { "windowHours": 24, "thresholdPercent": 4, "direction": "both" } ]
+    },
+    {
+      "id": "aapl", "name": "Apple", "symbol": "AAPL", "kind": "stock", "provider": "yahoo",
+      "rules": [ { "windowHours": 48, "thresholdPercent": 7, "direction": "both" } ]
+    },
+    {
+      "id": "pkn", "name": "Orlen (GPW)", "symbol": "PKN.WA", "kind": "stock", "provider": "yahoo",
+      "rules": [ { "windowHours": 48, "thresholdPercent": 7, "direction": "down" } ]
+    }
+  ]
+}
