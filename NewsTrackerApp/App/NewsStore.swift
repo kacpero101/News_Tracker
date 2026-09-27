@@ -38,7 +38,9 @@ final class NewsStore {
     var readingListTopics: Set<Topic> = []
 
     var filteredReadingList: [Article] {
-        readingListTopics.isEmpty ? readingList : readingList.filter { !$0.topics.isDisjoint(with: readingListTopics) }
+        guard !readingListTopics.isEmpty else { return readingList }
+        let query = ArticleQuery(topics: readingListTopics)
+        return readingList.filter(query.matches)
     }
 
     // MARK: Categories
@@ -250,8 +252,8 @@ final class NewsStore {
         await reloadReadingList()
         await reloadReadArchive()
 
-        // Forget filter selections of deleted categories.
-        let valid = Set(allTopics)
+        // Forget filter selections of deleted categories (the "no category" filter stays).
+        let valid = Set(allTopics + [.uncategorized])
         query.topics.formIntersection(valid)
         readingListTopics.formIntersection(valid)
     }

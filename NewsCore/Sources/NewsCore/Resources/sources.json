@@ -24,8 +24,8 @@
     { "id": "businessinsider-pl", "name": "Business Insider Polska", "url": "https://businessinsider.com.pl/.feed", "language": "pl", "defaultCategory": null, "verified": false },
     { "id": "gpw", "name": "GPW – Giełda Papierów Wartościowych", "url": "https://www.gpw.pl/_rss", "language": "pl", "defaultCategory": "finance", "verified": false },
     { "id": "spidersweb", "name": "Spider's Web", "url": "https://www.spidersweb.pl/feed", "language": "pl", "defaultCategory": null, "verified": false },
-    { "id": "defence24", "name": "Defence24", "url": "https://defence24.pl/_rss", "language": "pl", "defaultCategory": null, "verified": false },
-    { "id": "zaufanatrzeciastrona", "name": "Zaufana Trzecia Strona", "url": "https://zaufanatrzeciastrona.pl/feed/", "language": "pl", "defaultCategory": null, "verified": false },
+    { "id": "defence24", "name": "Defence24", "url": "https://defence24.pl/_rss", "language": "pl", "defaultCategory": "defense", "verified": false },
+    { "id": "zaufanatrzeciastrona", "name": "Zaufana Trzecia Strona", "url": "https://zaufanatrzeciastrona.pl/feed/", "language": "pl", "defaultCategory": "cybersecurity", "verified": false },
 
     { "id": "tagesschau-wirtschaft", "name": "tagesschau – Wirtschaft", "url": "https://www.tagesschau.de/wirtschaft/index~rss2.xml", "language": "de", "defaultCategory": "economy", "verified": true },
     { "id": "tagesschau-inland", "name": "tagesschau – Inland", "url": "https://www.tagesschau.de/inland/index~rss2.xml", "language": "de", "defaultCategory": null, "verified": true },

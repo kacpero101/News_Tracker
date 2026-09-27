@@ -4,14 +4,17 @@ import SwiftUI
 extension Topic {
     private static let builtInNames: [Topic: String] = [
         .finance: "Finanse", .politics: "Polityka", .breakthroughs: "Odkrycia",
-        .crypto: "Kryptowaluty", .economy: "Gospodarka",
+        .crypto: "Kryptowaluty", .economy: "Gospodarka", .defense: "Obronność",
+        .cybersecurity: "Cyberbezpieczeństwo", .uncategorized: "Bez kategorii",
     ]
     private static let builtInSymbols: [Topic: String] = [
         .finance: "chart.line.uptrend.xyaxis", .politics: "building.columns", .breakthroughs: "atom",
-        .crypto: "bitcoinsign.circle", .economy: "globe.europe.africa",
+        .crypto: "bitcoinsign.circle", .economy: "globe.europe.africa", .defense: "shield.checkered",
+        .cybersecurity: "lock.shield", .uncategorized: "tray",
     ]
     private static let builtInColors: [Topic: Color] = [
         .finance: .green, .politics: .red, .breakthroughs: .purple, .crypto: .orange, .economy: .blue,
+        .defense: .brown, .cybersecurity: .indigo, .uncategorized: .gray,
     ]
 
     var displayName: String {

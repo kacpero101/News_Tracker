@@ -53,4 +53,12 @@ final class ArticleQueryTests: XCTestCase {
         XCTAssertTrue(ArticleQuery().isEmpty)
         XCTAssertFalse(ArticleQuery(searchText: "x").isEmpty)
     }
+
+    func testUncategorizedFilter() {
+        // "Unclassified story" is the only article without topics.
+        XCTAssertEqual(ArticleQuery(topics: [.uncategorized]).apply(to: articles).map(\.title), ["Unclassified story"])
+        XCTAssertEqual(ArticleQuery(topics: [.uncategorized, .crypto]).apply(to: articles).count, 2)
+        XCTAssertEqual(ArticleQuery().apply(to: articles).count, 4)
+        XCTAssertFalse(Topic.uncategorized.isBuiltIn)
+    }
 }

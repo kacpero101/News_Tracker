@@ -6,14 +6,15 @@ _Ostatnia aktualizacja: 2026-09-27_
 
 1. ✅ Szkielet repo: `.gitignore`, `PROGRESS.md`, `DECISIONS.md`, `README.md`.
 2. ✅ `NewsCore` (Swift Package, bez UI): modele, parser RSS 2.0 / RSS 1.0 / Atom, czyszczenie HTML i daty, klasyfikator słów kluczowych, deduplikacja, filtrowanie i wyszukiwanie, równoległe pobieranie z izolacją błędów, cache JSON, lista „do przeczytania”, konfiguracja `sources.json` / `keywords.json`.
-3. ✅ Testy jednostkowe na fixtures (bez sieci) – **92 testy, wszystkie przechodzą** (`swift test`, Swift 6.2.4, Linux).
+3. ✅ Testy jednostkowe na fixtures (bez sieci) – **93 testy, wszystkie przechodzą** (`swift test`, Swift 6.2.4, Linux).
 4. ✅ Aplikacja iOS (SwiftUI, iOS 17) + `project.yml` (XcodeGen).
 5. ✅ README z instrukcją krok po kroku.
 6. ✅ Etap opcjonalny: Claude API (domyślnie wyłączone, klucz w Keychain, testy tylko na mockach).
 7. ✅ Pull Request do `main`: https://github.com/kacpero101/News_Tracker/pull/1
 8. ✅ Rynki: śledzenie cen akcji/ETF/krypto, reguły „zmiana ≥ X% w ciągu N h”, powiadomienia lokalne + GitHub Actions/ntfy.
 9. ✅ Po testach na symulatorze: własne kategorie, „Ignoruj podobne”, przycisk „Do przeczytania” przy każdym newsie, kategorie na liście „Do przeczytania”, oznaczanie jako przeczytany + archiwum przeczytanych, archiwum alertów, wyszukiwarka instrumentów (URNU/URNX), poprawka błędnych kategorii „Finanse”.
-10. ✅ Nowe źródła (money.pl, Puls Biznesu, Business Insider PL, GPW, Spider's Web, Defence24, Zaufana Trzecia Strona) – razem 33 kanały; automatyczne znajdowanie kanału na stronie WWW; „Dodaj źródło” w Ustawieniach. **92 testy przechodzą.**
+10. ✅ Nowe źródła (money.pl, Puls Biznesu, Business Insider PL, GPW, Spider's Web, Defence24, Zaufana Trzecia Strona) – razem 33 kanały; automatyczne znajdowanie kanału na stronie WWW; „Dodaj źródło” w Ustawieniach.
+11. ✅ Kategorie Obronność i Cyberbezpieczeństwo (wbudowane, PL/EN/DE), chip „Bez kategorii” (Newsy i „Do przeczytania”). **93 testy przechodzą.**
 
 ## Zrobione
 

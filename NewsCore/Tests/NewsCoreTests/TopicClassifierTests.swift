@@ -75,6 +75,11 @@ final class TopicClassifierTests: XCTestCase {
         XCTAssertTrue(topics("Forscher entdecken neuen Exoplaneten", .german).contains(.breakthroughs))
         XCTAssertTrue(topics("Die Konjunktur in Deutschland schwächelt", .german).contains(.economy))
         XCTAssertTrue(topics("Scientists discover a new antibiotic", .english).contains(.breakthroughs))
+        XCTAssertTrue(topics("Polska kupi kolejne czołgi i zestawy Patriot dla wojska", .polish).contains(.defense))
+        XCTAssertTrue(topics("Bundeswehr bestellt neue Panzer", .german).contains(.defense))
+        XCTAssertTrue(topics("Hakerzy wykradli dane klientów – wyciek danych z banku", .polish).contains(.cybersecurity))
+        XCTAssertTrue(topics("Ransomware gang hits hospital network", .english).contains(.cybersecurity))
+        XCTAssertFalse(topics("Pożar w hali ze środkami do dezynfekcji", .polish).contains(.defense))
         XCTAssertEqual(topics("Local football club wins cup", .english), [])
     }
 

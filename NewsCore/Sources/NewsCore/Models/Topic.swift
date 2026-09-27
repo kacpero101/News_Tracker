@@ -16,9 +16,14 @@ public struct Topic: RawRepresentable, Codable, Hashable, Sendable, Comparable, 
     public static let breakthroughs = Topic(rawValue: "breakthroughs")
     public static let crypto = Topic(rawValue: "crypto")
     public static let economy = Topic(rawValue: "economy")
+    public static let defense = Topic(rawValue: "defense")
+    public static let cybersecurity = Topic(rawValue: "cybersecurity")
+
+    /// Filter-only pseudo-topic selecting news without any topic. Never assigned to articles.
+    public static let uncategorized = Topic(rawValue: "uncategorized")
 
     /// Built-in topics in display order.
-    public static let builtIn: [Topic] = [.finance, .politics, .breakthroughs, .crypto, .economy]
+    public static let builtIn: [Topic] = [.finance, .politics, .breakthroughs, .crypto, .economy, .defense, .cybersecurity]
 
     public var isBuiltIn: Bool { Topic.builtIn.contains(self) }
 

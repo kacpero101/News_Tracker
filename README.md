@@ -1,6 +1,6 @@
 # News Tracker
 
-Natywna aplikacja iOS (Swift/SwiftUI), która zbiera newsy z darmowych kanałów RSS/Atom (PL/EN/DE) i porządkuje je tematycznie: **finanse, polityka, przełomowe odkrycia, kryptowaluty, gospodarka**.
+Natywna aplikacja iOS (Swift/SwiftUI), która zbiera newsy z darmowych kanałów RSS/Atom (PL/EN/DE) i porządkuje je tematycznie: **finanse, polityka, przełomowe odkrycia, kryptowaluty, gospodarka, obronność, cyberbezpieczeństwo** oraz własne kategorie. Newsy niepasujące do żadnej kategorii pokazuje chip **„Bez kategorii”**.
 
 - tylko darmowe RSS/Atom, bez kluczy API i bez backendu,
 - klasyfikacja offline: kategoria źródła + słowa kluczowe (PL/EN/DE),
@@ -98,7 +98,7 @@ Można też otworzyć `NewsCore/Package.swift` w Xcode i uruchomić testy (**⌘
   "language": "en", "defaultCategory": "economy", "verified": false }
 ```
 - `language`: `pl` | `en` | `de`
-- `defaultCategory`: `finance` | `politics` | `breakthroughs` | `crypto` | `economy` | `null` (źródło ogólne)
+- `defaultCategory`: `finance` | `politics` | `breakthroughs` | `crypto` | `economy` | `defense` | `cybersecurity` | `null` (źródło ogólne)
 - `verified`: czy adres został sprawdzony (informacyjnie; w UI niezweryfikowane mają ikonę „?”)
 
 Źródła można też włączać/wyłączać w aplikacji: **Ustawienia → Kanały RSS**.

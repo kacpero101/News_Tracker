@@ -89,7 +89,8 @@ public struct ClaudeArticleEnhancer: Sendable {
     short description published in the RSS feed. Assign zero or more of these topics: \
     finance (markets, banks, interest rates, currencies), politics, breakthroughs \
     (scientific or technological discoveries), crypto (cryptocurrencies, blockchain), \
-    economy (macroeconomics, inflation, trade, labour market). Write a neutral summary of \
+    economy (macroeconomics, inflation, trade, labour market), defense (armed forces, weapons, \
+    defence industry, wars), cybersecurity (hacking, data leaks, malware, online fraud). Write a neutral summary of \
     at most two sentences in the same language as the item, using only the given text.
     """
 

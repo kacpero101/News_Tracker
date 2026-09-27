@@ -19,9 +19,13 @@ public struct ArticleQuery: Equatable, Sendable {
         topics.isEmpty && languages.isEmpty && searchText.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
-    /// Whether a single article satisfies the query.
+    /// Whether a single article satisfies the query. Selecting `Topic.uncategorized`
+    /// matches news without any topic.
     public func matches(_ article: Article) -> Bool {
-        if !topics.isEmpty && article.topics.isDisjoint(with: topics) { return false }
+        if !topics.isEmpty {
+            let wantsUncategorized = topics.contains(.uncategorized) && article.topics.isEmpty
+            if article.topics.isDisjoint(with: topics) && !wantsUncategorized { return false }
+        }
         if !languages.isEmpty && !languages.contains(article.language) { return false }
         return matchesSearch(article)
     }

@@ -48,6 +48,19 @@ struct TopicChips: View {
                         topicChip
                     }
                 }
+                // News that match no category (e.g. local incidents from general feeds).
+                chip(
+                    title: Topic.uncategorized.displayName,
+                    systemImage: Topic.uncategorized.systemImage,
+                    color: Topic.uncategorized.color,
+                    isOn: selection.contains(.uncategorized)
+                ) {
+                    if selection.contains(.uncategorized) {
+                        selection.remove(.uncategorized)
+                    } else {
+                        selection.insert(.uncategorized)
+                    }
+                }
                 if let onAddCategory {
                     Button(action: onAddCategory) {
                         Label("Dodaj", systemImage: "plus")
