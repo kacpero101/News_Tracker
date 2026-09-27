@@ -9,7 +9,11 @@ import Observation
 final class NewsStore {
     // MARK: Articles & filters
 
-    private(set) var articles: [Article] = []
+    private(set) var articles: [Article] = [] {
+        didSet { updateVisibleArticles() }
+    }
+    /// `articles` without muted ("ignored") news.
+    private(set) var visibleArticles: [Article] = []
     var query = ArticleQuery()
     private(set) var isRefreshing = false
     private(set) var lastRefresh: Date?
@@ -18,12 +22,32 @@ final class NewsStore {
     /// One-off error shown in an alert.
     var errorMessage: String?
 
-    var filteredArticles: [Article] { query.apply(to: articles) }
+    var filteredArticles: [Article] { query.apply(to: visibleArticles) }
+
+    /// Number of news hidden by the mute list.
+    var hiddenCount: Int { articles.count - visibleArticles.count }
 
     // MARK: Reading list
 
     private(set) var readingList: [Article] = []
     private(set) var savedIDs: Set<String> = []
+    /// Category filter of the reading list (empty = all).
+    var readingListTopics: Set<Topic> = []
+
+    var filteredReadingList: [Article] {
+        readingListTopics.isEmpty ? readingList : readingList.filter { !$0.topics.isDisjoint(with: readingListTopics) }
+    }
+
+    // MARK: Categories
+
+    /// User-defined categories (shown after the built-in ones).
+    private(set) var customCategories: [CustomCategory]
+    var allTopics: [Topic] { Topic.builtIn + customCategories.map(\.topic) }
+
+    // MARK: Ignored news
+
+    private(set) var muteList: MuteList
+    private var muteMatcher: MuteMatcher
 
     // MARK: Sources
 
@@ -49,6 +73,9 @@ final class NewsStore {
 
     private let repository: NewsRepository
     private let readingListStore: ReadingList
+    private let baseKeywords: KeywordList
+    private let categoriesStore: JSONFileStore<[CustomCategory]>?
+    private let muteStore: JSONFileStore<MuteList>?
     private let defaults: UserDefaults
     private let keychain: KeychainStore
     private var enhanceTask: Task<Void, Never>?
@@ -73,7 +100,7 @@ final class NewsStore {
         } catch {
             configuration = ([], KeywordList(topics: [:]), "Nie udało się wczytać konfiguracji: \(error.localizedDescription)")
         }
-        let keywords = configuration.keywords
+        baseKeywords = configuration.keywords
         self.sources = configuration.sources
         self.configurationError = configuration.error
 
@@ -81,14 +108,25 @@ final class NewsStore {
             for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true
         ))?.appendingPathComponent("NewsTracker", isDirectory: true)
 
+        let categoriesFile: JSONFileStore<[CustomCategory]>? = directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("categories.json")) }
+        let muteFile: JSONFileStore<MuteList>? = directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("mute-list.json")) }
+        categoriesStore = categoriesFile
+        muteStore = muteFile
+        let categories = ((try? categoriesFile?.load()) ?? nil) ?? []
+        let mutes = ((try? muteFile?.load()) ?? nil) ?? MuteList()
+        TopicCatalog.shared.update(categories)
+
         repository = NewsRepository(
-            aggregator: FeedAggregator(classifier: TopicClassifier(keywords: keywords)),
+            aggregator: FeedAggregator(classifier: TopicClassifier(keywords: configuration.keywords.merging(categories))),
             cache: directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("articles.json")) }
         )
         readingListStore = ReadingList(
             store: directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("reading-list.json")) }
         )
 
+        customCategories = categories
+        muteList = mutes
+        muteMatcher = mutes.matcher()
         disabledSourceIDs = Set(defaults.stringArray(forKey: Keys.disabledSources) ?? [])
         aiEnabled = defaults.bool(forKey: Keys.aiEnabled)
         aiModel = defaults.string(forKey: Keys.aiModel) ?? ClaudeArticleEnhancer.defaultModel
@@ -153,6 +191,98 @@ final class NewsStore {
     func clearFilters() {
         query.topics = []
         query.languages = []
+    }
+
+    // MARK: Categories
+
+    func category(for topic: Topic) -> CustomCategory? {
+        customCategories.first { $0.topic == topic }
+    }
+
+    /// Adds or updates a custom category and re-classifies downloaded and saved news.
+    func saveCategory(_ category: CustomCategory) async {
+        let previous = customCategories
+        if let index = customCategories.firstIndex(where: { $0.id == category.id }) {
+            customCategories[index] = category
+        } else {
+            customCategories.append(category)
+        }
+        await applyCategories(previous: previous)
+    }
+
+    func deleteCategory(_ category: CustomCategory) async {
+        let previous = customCategories
+        customCategories.removeAll { $0.id == category.id }
+        await applyCategories(previous: previous)
+    }
+
+    private func applyCategories(previous: [CustomCategory]) async {
+        TopicCatalog.shared.update(customCategories)
+        do {
+            try categoriesStore?.save(customCategories)
+        } catch {
+            errorMessage = "Nie udało się zapisać kategorii: \(error.localizedDescription)"
+        }
+        let classifier = TopicClassifier(keywords: baseKeywords.merging(customCategories))
+        let managed = Set((previous + customCategories).map(\.topic))
+        articles = await repository.applyClassifier(classifier, managing: managed)
+        try? await readingListStore.reclassify(with: classifier, managing: managed)
+        await reloadReadingList()
+
+        // Forget filter selections of deleted categories.
+        let valid = Set(allTopics)
+        query.topics.formIntersection(valid)
+        readingListTopics.formIntersection(valid)
+    }
+
+    // MARK: Ignored news
+
+    /// Hides news containing any of `keywords` (and optionally one specific article).
+    func mute(keywords: [String], hiding article: Article?) {
+        var updated = muteList
+        updated.add(keywords: keywords)
+        if let article {
+            updated.hiddenArticleIDs.insert(article.id)
+        }
+        setMuteList(updated)
+    }
+
+    func hide(_ article: Article) {
+        var updated = muteList
+        updated.hiddenArticleIDs.insert(article.id)
+        setMuteList(updated)
+    }
+
+    func unmute(keyword: String) {
+        var updated = muteList
+        updated.remove(keyword: keyword)
+        setMuteList(updated)
+    }
+
+    func restoreHiddenArticles() {
+        var updated = muteList
+        updated.hiddenArticleIDs = []
+        setMuteList(updated)
+    }
+
+    /// Which muted keywords hide this article (for the settings screen).
+    func mutedKeywords(in article: Article) -> [String] {
+        muteMatcher.matchingKeywords(article)
+    }
+
+    private func setMuteList(_ list: MuteList) {
+        muteList = list
+        muteMatcher = list.matcher()
+        updateVisibleArticles()
+        do {
+            try muteStore?.save(list)
+        } catch {
+            errorMessage = "Nie udało się zapisać listy ignorowanych: \(error.localizedDescription)"
+        }
+    }
+
+    private func updateVisibleArticles() {
+        visibleArticles = muteMatcher.visible(articles)
     }
 
     // MARK: Reading list

@@ -4,6 +4,9 @@ import SwiftUI
 struct NewsListView: View {
     @Environment(NewsStore.self) private var store
     @State private var presentedArticle: Article?
+    @State private var categoryEditor: CategoryEditorTarget?
+    @State private var categoryToDelete: CustomCategory?
+    @State private var articleToMute: Article?
 
     var body: some View {
         @Bindable var store = store
@@ -17,12 +20,28 @@ struct NewsListView: View {
                     FailuresBanner(failures: store.failures)
                 }
                 ForEach(store.filteredArticles) { article in
-                    ArticleListRow(article: article, presentedArticle: $presentedArticle)
+                    ArticleListRow(article: article, presentedArticle: $presentedArticle) { article in
+                        articleToMute = article
+                    }
+                }
+                if store.hiddenCount > 0 {
+                    NavigationLink {
+                        MutedNewsView()
+                    } label: {
+                        Label("Ukryte newsy: \(store.hiddenCount)", systemImage: "eye.slash")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             .listStyle(.plain)
             .safeAreaInset(edge: .top, spacing: 0) {
-                TopicFilterBar()
+                TopicChips(
+                    selection: $store.query.topics,
+                    onAddCategory: { categoryEditor = CategoryEditorTarget(category: nil) },
+                    onEditCategory: { categoryEditor = CategoryEditorTarget(category: $0) },
+                    onDeleteCategory: { categoryToDelete = $0 }
+                )
             }
             .overlay { emptyState }
             .navigationTitle("News Tracker")
@@ -46,6 +65,27 @@ struct NewsListView: View {
             .sheet(item: $presentedArticle) { article in
                 SafariView(url: article.link)
                     .ignoresSafeArea()
+            }
+            .sheet(item: $categoryEditor) { target in
+                CategoryEditorView(original: target.category)
+            }
+            .sheet(item: $articleToMute) { article in
+                IgnoreSimilarView(article: article)
+            }
+            .confirmationDialog(
+                "Usunąć kategorię?",
+                isPresented: Binding(
+                    get: { categoryToDelete != nil },
+                    set: { if !$0 { categoryToDelete = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: categoryToDelete
+            ) { category in
+                Button("Usuń „\(category.name)”", role: .destructive) {
+                    Task { await store.deleteCategory(category) }
+                }
+            } message: { _ in
+                Text("Newsy nie zostaną usunięte – przestaną tylko być oznaczane tą kategorią.")
             }
         }
     }
@@ -77,21 +117,26 @@ struct NewsListView: View {
     }
 }
 
-/// A row with tap-to-open, swipe-to-save and a context menu.
+/// A row with tap-to-open, a "read later" button, swipe actions and a context menu.
 struct ArticleListRow: View {
     @Environment(NewsStore.self) private var store
     @Environment(\.openURL) private var openURL
     let article: Article
     @Binding var presentedArticle: Article?
+    /// Enables "ignore similar" and "hide" actions (news list only).
+    var onIgnoreSimilar: ((Article) -> Void)?
 
     var body: some View {
         let saved = store.isSaved(article)
-        Button {
-            presentedArticle = article
-        } label: {
-            ArticleRow(article: article, isSaved: saved)
+        ArticleRow(article: article, isSaved: saved) {
+            Task { await store.toggleSaved(article) }
         }
-        .buttonStyle(.plain)
+        .onTapGesture {
+            presentedArticle = article
+        }
+        .accessibilityAction(named: "Otwórz artykuł") {
+            presentedArticle = article
+        }
         .swipeActions(edge: .trailing) {
             Button {
                 Task { await store.toggleSaved(article) }
@@ -100,11 +145,33 @@ struct ArticleListRow: View {
             }
             .tint(saved ? Color.gray : Color.accentColor)
         }
+        .swipeActions(edge: .leading) {
+            if let onIgnoreSimilar {
+                Button {
+                    onIgnoreSimilar(article)
+                } label: {
+                    Label("Ignoruj podobne", systemImage: "eye.slash")
+                }
+                .tint(.orange)
+            }
+        }
         .contextMenu {
             Button {
                 Task { await store.toggleSaved(article) }
             } label: {
                 Label(saved ? "Usuń z listy" : "Zapisz do przeczytania", systemImage: saved ? "bookmark.slash" : "bookmark")
+            }
+            if let onIgnoreSimilar {
+                Button {
+                    onIgnoreSimilar(article)
+                } label: {
+                    Label("Ignoruj podobne…", systemImage: "eye.slash")
+                }
+                Button {
+                    store.hide(article)
+                } label: {
+                    Label("Ukryj ten news", systemImage: "xmark.circle")
+                }
             }
             Button {
                 openURL(article.link)

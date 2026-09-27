@@ -18,6 +18,19 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Newsy") {
+                    NavigationLink {
+                        CategoriesSettingsView()
+                    } label: {
+                        LabeledContent("Kategorie", value: "\(store.allTopics.count)")
+                    }
+                    NavigationLink {
+                        MutedNewsView()
+                    } label: {
+                        LabeledContent("Ignorowane słowa", value: "\(store.muteList.keywords.count)")
+                    }
+                }
+
                 Section("Rynki") {
                     NavigationLink {
                         PriceAlertsSettingsView()

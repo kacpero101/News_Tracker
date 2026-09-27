@@ -1,10 +1,12 @@
 import NewsCore
 import SwiftUI
 
-/// Headline, short description, source, date and topics of one article.
+/// Headline, short description, source, date and topics of one article,
+/// with a "read later" button in the top-right corner.
 struct ArticleRow: View {
     let article: Article
     let isSaved: Bool
+    let onToggleSaved: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -20,11 +22,15 @@ struct ArticleRow: View {
                     Text("brak daty")
                 }
                 Spacer(minLength: 0)
-                if isSaved {
-                    Image(systemName: "bookmark.fill")
-                        .foregroundStyle(Color.accentColor)
-                        .accessibilityLabel("Zapisane")
+                Button(action: onToggleSaved) {
+                    Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                        .font(.body)
+                        .foregroundStyle(isSaved ? Color.accentColor : Color.secondary)
+                        .frame(width: 36, height: 28, alignment: .trailing)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.borderless)
+                .accessibilityLabel(isSaved ? "Usuń z listy do przeczytania" : "Zapisz do przeczytania")
             }
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -72,6 +78,7 @@ struct TopicBadge: View {
         Label(topic.displayName, systemImage: topic.systemImage)
             .labelStyle(.titleAndIcon)
             .font(.caption2.weight(.medium))
+            .lineLimit(1)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(topic.color.opacity(0.15), in: Capsule())

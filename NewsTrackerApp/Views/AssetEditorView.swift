@@ -16,6 +16,10 @@ struct AssetEditorView: View {
     @State private var rules: [AlertRule] = [AlertRule(windowHours: 24, thresholdPercent: 5)]
     @State private var validation: String?
     @State private var isValidating = false
+    @State private var searchQuery = ""
+    @State private var searchResults: [SymbolSearchResult] = []
+    @State private var searchMessage: String?
+    @State private var isSearching = false
 
     static let windowOptions: [Double] = [1, 2, 4, 6, 12, 24, 48, 72, 168]
 
@@ -49,6 +53,51 @@ struct AssetEditorView: View {
         NavigationStack {
             Form {
                 Section {
+                    HStack {
+                        TextField("Nazwa lub symbol, np. uranium, URNU", text: $searchQuery)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .submitLabel(.search)
+                            .onSubmit { Task { await search(searchQuery) } }
+                        if isSearching {
+                            ProgressView()
+                        } else {
+                            Button {
+                                Task { await search(searchQuery) }
+                            } label: {
+                                Image(systemName: "magnifyingglass")
+                            }
+                            .buttonStyle(.borderless)
+                            .disabled(searchQuery.trimmingCharacters(in: .whitespaces).isEmpty)
+                            .accessibilityLabel("Szukaj")
+                        }
+                    }
+                    if let searchMessage {
+                        Text(searchMessage).font(.footnote).foregroundStyle(.secondary)
+                    }
+                    ForEach(searchResults) { result in
+                        Button {
+                            pick(result)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack {
+                                    Text(result.symbol).font(.body.monospaced().weight(.semibold))
+                                    Spacer()
+                                    Text(result.exchange ?? "").font(.caption).foregroundStyle(.secondary)
+                                }
+                                Text(result.name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    Text("Wyszukaj instrument")
+                } footer: {
+                    Text("Wyszukiwanie w Yahoo Finance. Instrumenty spoza USA mają sufiks giełdy, np. .L (Londyn), .DE (Xetra), .AS (Amsterdam), .MI (Mediolan), .WA (GPW).")
+                }
+
+                Section {
                     TextField("Nazwa (np. Bitcoin)", text: $name)
                     Picker("Rodzaj", selection: $kind) {
                         Text("Akcja").tag(AssetKind.stock)
@@ -57,7 +106,8 @@ struct AssetEditorView: View {
                         Text("Indeks").tag(AssetKind.index)
                     }
                     .onChange(of: kind) { _, newKind in
-                        if original == nil {
+                        // Suggest the usual provider only while no symbol is chosen yet.
+                        if original == nil && trimmedSymbol.isEmpty {
                             provider = newKind == .crypto ? .coingecko : .yahoo
                         }
                     }
@@ -136,7 +186,42 @@ struct AssetEditorView: View {
             validation = "OK – ostatnia cena: \(PriceAlertFormatter.price(point.price))"
         case let .failure(error):
             validation = "Błąd: \(error.localizedDescription)"
+            // Unknown Yahoo symbol: look it up to show exchange-suffixed candidates.
+            if case .symbolNotFound(_, provider: .yahoo)? = error as? PriceProviderError {
+                searchQuery = trimmedSymbol
+                await search(trimmedSymbol)
+            }
         }
+    }
+
+    private func search(_ query: String) async {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        isSearching = true
+        defer { isSearching = false }
+        do {
+            searchResults = try await YahooSymbolSearch().search(trimmed)
+            searchMessage = searchResults.isEmpty
+                ? "Brak wyników dla „\(trimmed)”. Spróbuj nazwy funduszu, np. „uranium”."
+                : "Wybierz instrument z listy:"
+        } catch {
+            searchResults = []
+            searchMessage = "Błąd wyszukiwania: \(error.localizedDescription)"
+        }
+    }
+
+    private func pick(_ result: SymbolSearchResult) {
+        provider = .yahoo
+        symbol = result.symbol
+        kind = result.kind
+        if name.trimmingCharacters(in: .whitespaces).isEmpty {
+            name = result.name
+        }
+        searchResults = []
+        let exchange = result.exchange.map { " (" + $0 + ")" } ?? ""
+        searchMessage = "Wybrano \(result.symbol)\(exchange)."
+        validation = nil
+        Task { await validate() }
     }
 }
 
