@@ -98,45 +98,90 @@ struct SettingsView: View {
 
 struct SourcesView: View {
     @Environment(NewsStore.self) private var store
+    @State private var showsAddSource = false
 
     var body: some View {
         List {
             ForEach(Language.allCases, id: \.self) { language in
                 Section("\(language.flag) \(language.displayName)") {
                     ForEach(store.sources.filter { $0.language == language }) { source in
-                        Toggle(isOn: Binding(
-                            get: { store.isEnabled(source) },
-                            set: { store.setEnabled($0, for: source) }
-                        )) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                HStack(spacing: 4) {
-                                    Text(source.name)
-                                    if !source.verified {
-                                        Image(systemName: "questionmark.circle")
-                                            .foregroundStyle(.secondary)
-                                            .accessibilityLabel("Niezweryfikowane")
+                        SourceRow(source: source)
+                            .swipeActions {
+                                if store.isCustom(source) {
+                                    Button(role: .destructive) {
+                                        store.removeSource(source)
+                                    } label: {
+                                        Label("Usuń", systemImage: "trash")
                                     }
                                 }
-                                if let category = source.defaultCategory {
-                                    Text(category.displayName)
-                                        .font(.caption)
-                                        .foregroundStyle(category.color)
-                                }
-                                if let failure = store.failure(for: source) {
-                                    Text(failure.message)
-                                        .font(.caption)
-                                        .foregroundStyle(.red)
-                                }
                             }
-                        }
                     }
                 }
             }
         }
         .navigationTitle("Źródła")
         .toolbar {
-            Button("Odśwież") { Task { await store.refresh() } }
-                .disabled(store.isRefreshing)
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Odśwież") { Task { await store.refresh() } }
+                    .disabled(store.isRefreshing)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showsAddSource = true
+                } label: {
+                    Image(systemName: "plus")
+                        .accessibilityLabel("Dodaj źródło")
+                }
+            }
+        }
+        .sheet(isPresented: $showsAddSource) {
+            AddSourceView()
+        }
+    }
+}
+
+private struct SourceRow: View {
+    @Environment(NewsStore.self) private var store
+    let source: FeedSource
+
+    var body: some View {
+        Toggle(isOn: Binding(
+            get: { store.isEnabled(source) },
+            set: { store.setEnabled($0, for: source) }
+        )) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(source.name)
+                    if !source.verified {
+                        Image(systemName: "questionmark.circle")
+                            .foregroundStyle(.secondary)
+                            .accessibilityLabel("Niezweryfikowane")
+                    }
+                    if store.isCustom(source) {
+                        Text("własne")
+                            .font(.caption2)
+                            .padding(.horizontal, 5)
+                            .background(Color.secondary.opacity(0.15), in: Capsule())
+                    }
+                }
+                if let category = source.defaultCategory {
+                    Text(category.displayName)
+                        .font(.caption)
+                        .foregroundStyle(category.color)
+                }
+                if let resolved = store.resolvedFeedURLs[source.id] {
+                    Text("Kanał znaleziony na stronie: \(resolved.absoluteString)")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+                if let failure = store.failure(for: source) {
+                    Text(failure.message)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
         }
     }
 }

@@ -103,6 +103,10 @@ Można też otworzyć `NewsCore/Package.swift` w Xcode i uruchomić testy (**⌘
 
 Źródła można też włączać/wyłączać w aplikacji: **Ustawienia → Kanały RSS**.
 
+**Dodawanie własnych źródeł w aplikacji:** Ustawienia → Kanały RSS → **+**. Wpisz adres serwisu (np. `pb.pl`), stronę z listą kanałów (np. `gpw.pl/_rss`) albo bezpośredni adres kanału. Aplikacja znajdzie kanały RSS/Atom (odnośniki `<link rel="alternate">`, linki „RSS” na stronie, typowe adresy `/feed`, `/rss`) i pokaże je z liczbą wpisów oraz przykładowym nagłówkiem. Własne źródła usuniesz przesunięciem w lewo.
+
+**Adres strony zamiast kanału:** jeśli pod adresem źródła jest strona WWW, a nie kanał (np. strona z listą kanałów), aplikacja przy odświeżaniu sama wyszuka na niej kanał i zapamięta go do końca sesji. Na liście źródeł widać wtedy „Kanał znaleziony na stronie: …”.
+
 ### Słowa kluczowe – `NewsCore/Sources/NewsCore/Resources/keywords.json`
 
 ```json

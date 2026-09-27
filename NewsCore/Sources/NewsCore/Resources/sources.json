@@ -19,6 +19,13 @@
     { "id": "tvn24-najnowsze", "name": "TVN24 – Najnowsze", "url": "https://tvn24.pl/najnowsze.xml", "language": "pl", "defaultCategory": null, "verified": true },
     { "id": "naukawpolsce", "name": "Nauka w Polsce (PAP)", "url": "https://naukawpolsce.pl/rss.xml", "language": "pl", "defaultCategory": "breakthroughs", "verified": true },
     { "id": "rp-ekonomia", "name": "Rzeczpospolita – Ekonomia", "url": "https://www.rp.pl/rss/451-ekonomia", "language": "pl", "defaultCategory": "economy", "verified": false },
+    { "id": "money-pl", "name": "money.pl", "url": "https://www.money.pl/rss/", "language": "pl", "defaultCategory": null, "verified": false },
+    { "id": "pulsbiznesu", "name": "Puls Biznesu", "url": "https://www.pb.pl/rss", "language": "pl", "defaultCategory": null, "verified": false },
+    { "id": "businessinsider-pl", "name": "Business Insider Polska", "url": "https://businessinsider.com.pl/.feed", "language": "pl", "defaultCategory": null, "verified": false },
+    { "id": "gpw", "name": "GPW – Giełda Papierów Wartościowych", "url": "https://www.gpw.pl/_rss", "language": "pl", "defaultCategory": "finance", "verified": false },
+    { "id": "spidersweb", "name": "Spider's Web", "url": "https://www.spidersweb.pl/feed", "language": "pl", "defaultCategory": null, "verified": false },
+    { "id": "defence24", "name": "Defence24", "url": "https://defence24.pl/_rss", "language": "pl", "defaultCategory": null, "verified": false },
+    { "id": "zaufanatrzeciastrona", "name": "Zaufana Trzecia Strona", "url": "https://zaufanatrzeciastrona.pl/feed/", "language": "pl", "defaultCategory": null, "verified": false },
 
     { "id": "tagesschau-wirtschaft", "name": "tagesschau – Wirtschaft", "url": "https://www.tagesschau.de/wirtschaft/index~rss2.xml", "language": "de", "defaultCategory": "economy", "verified": true },
     { "id": "tagesschau-inland", "name": "tagesschau – Inland", "url": "https://www.tagesschau.de/inland/index~rss2.xml", "language": "de", "defaultCategory": null, "verified": true },

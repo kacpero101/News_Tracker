@@ -54,7 +54,11 @@ final class NewsStore {
 
     // MARK: Sources
 
-    let sources: [FeedSource]
+    /// Bundled sources (`sources.json`) followed by sources added by the user.
+    var sources: [FeedSource] { bundledSources + customSources }
+    private(set) var customSources: [FeedSource]
+    /// Feed URLs found on web pages of sources configured with a page address.
+    private(set) var resolvedFeedURLs: [String: URL] = [:]
     var disabledSourceIDs: Set<String> {
         didSet { defaults.set(Array(disabledSourceIDs), forKey: Keys.disabledSources) }
     }
@@ -77,6 +81,8 @@ final class NewsStore {
     private let repository: NewsRepository
     private let readingListStore: ReadingList
     private let readArchiveStore: ReadArchive
+    private let bundledSources: [FeedSource]
+    private let customSourcesStore: JSONFileStore<[FeedSource]>?
     private let baseKeywords: KeywordList
     private let categoriesStore: JSONFileStore<[CustomCategory]>?
     private let muteStore: JSONFileStore<MuteList>?
@@ -105,7 +111,7 @@ final class NewsStore {
             configuration = ([], KeywordList(topics: [:]), "Nie udało się wczytać konfiguracji: \(error.localizedDescription)")
         }
         baseKeywords = configuration.keywords
-        self.sources = configuration.sources
+        bundledSources = configuration.sources
         self.configurationError = configuration.error
 
         let directory = (try? FileManager.default.url(
@@ -114,8 +120,11 @@ final class NewsStore {
 
         let categoriesFile: JSONFileStore<[CustomCategory]>? = directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("categories.json")) }
         let muteFile: JSONFileStore<MuteList>? = directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("mute-list.json")) }
+        let customSourcesFile: JSONFileStore<[FeedSource]>? = directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("custom-sources.json")) }
         categoriesStore = categoriesFile
         muteStore = muteFile
+        customSourcesStore = customSourcesFile
+        let userSources = ((try? customSourcesFile?.load()) ?? nil) ?? []
         let categories = ((try? categoriesFile?.load()) ?? nil) ?? []
         let mutes = ((try? muteFile?.load()) ?? nil) ?? MuteList()
         TopicCatalog.shared.update(categories)
@@ -131,6 +140,7 @@ final class NewsStore {
             store: directory.map { JSONFileStore(fileURL: $0.appendingPathComponent("read-archive.json")) }
         )
 
+        customSources = userSources
         customCategories = categories
         muteList = mutes
         muteMatcher = mutes.matcher()
@@ -163,6 +173,7 @@ final class NewsStore {
         let outcome = await repository.refresh(sources: enabledSources)
         articles = outcome.articles
         failures = outcome.failures
+        resolvedFeedURLs = outcome.resolvedFeedURLs
         lastRefresh = Date()
         defaults.set(lastRefresh, forKey: Keys.lastRefresh)
 
@@ -396,6 +407,37 @@ final class NewsStore {
 
     func failure(for source: FeedSource) -> SourceFailure? {
         failures.first { $0.sourceID == source.id }
+    }
+
+    func isCustom(_ source: FeedSource) -> Bool {
+        customSources.contains { $0.id == source.id }
+    }
+
+    /// Whether a feed with this address is already on the list.
+    func hasSource(url: URL) -> Bool {
+        sources.contains { $0.url == url || resolvedFeedURLs[$0.id] == url }
+    }
+
+    /// Adds a source found with the feed finder and refreshes the news.
+    func addSource(_ source: FeedSource) async {
+        customSources.removeAll { $0.id == source.id }
+        customSources.append(source)
+        saveCustomSources()
+        await refresh()
+    }
+
+    func removeSource(_ source: FeedSource) {
+        customSources.removeAll { $0.id == source.id }
+        disabledSourceIDs.remove(source.id)
+        saveCustomSources()
+    }
+
+    private func saveCustomSources() {
+        do {
+            try customSourcesStore?.save(customSources)
+        } catch {
+            errorMessage = "Nie udało się zapisać źródeł: \(error.localizedDescription)"
+        }
     }
 
     // MARK: AI (optional)

@@ -7,6 +7,8 @@ public actor NewsRepository {
         public var articles: [Article]
         public var failures: [SourceFailure]
         public var newArticleCount: Int
+        /// Source ID → feed URL found on the source's web page (see `FeedAggregator`).
+        public var resolvedFeedURLs: [String: URL]
     }
 
     private var aggregator: FeedAggregator
@@ -17,6 +19,8 @@ public actor NewsRepository {
     private let now: @Sendable () -> Date
     private var articles: [Article] = []
     private var loaded = false
+    /// Feed URLs found on web pages during this session, reused on the next refresh.
+    private var resolvedFeedURLs: [String: URL] = [:]
 
     /// - Parameters:
     ///   - maxAge: articles older than this are dropped from the cache (default 7 days).
@@ -50,14 +54,26 @@ public actor NewsRepository {
     public func refresh(sources: [FeedSource]) async -> RefreshOutcome {
         let previous = cachedArticles()
         let previousIDs = Set(previous.map(\.id))
-        let result = await aggregator.fetchAll(sources)
+        // Sources configured with a web page address use the feed found on it last time.
+        let effectiveSources = sources.map { source -> FeedSource in
+            guard let url = resolvedFeedURLs[source.id] else { return source }
+            return FeedSource(id: source.id, name: source.name, url: url, language: source.language,
+                              defaultCategory: source.defaultCategory, verified: source.verified)
+        }
+        let result = await aggregator.fetchAll(effectiveSources)
+        resolvedFeedURLs.merge(result.resolvedFeedURLs) { _, new in new }
+        for failure in result.failures {
+            // Look for the feed on the page again next time.
+            resolvedFeedURLs[failure.sourceID] = nil
+        }
 
         let merged = merge(fresh: result.articles, cached: previous)
         articles = merged
         try? cache?.save(merged)
 
         let newCount = merged.filter { !previousIDs.contains($0.id) }.count
-        return RefreshOutcome(articles: merged, failures: result.failures, newArticleCount: newCount)
+        return RefreshOutcome(articles: merged, failures: result.failures, newArticleCount: newCount,
+                              resolvedFeedURLs: resolvedFeedURLs)
     }
 
     /// Replaces stored articles (e.g. after AI enrichment) and persists them.
