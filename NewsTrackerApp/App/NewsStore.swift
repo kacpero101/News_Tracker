@@ -67,19 +67,15 @@ final class NewsStore {
         self.defaults = defaults
         self.keychain = keychain
 
-        var configurationError: String?
-        let sources: [FeedSource]
-        let keywords: KeywordList
+        let configuration: (sources: [FeedSource], keywords: KeywordList, error: String?)
         do {
-            sources = try NewsConfiguration.defaultSources()
-            keywords = try NewsConfiguration.defaultKeywords()
+            configuration = (try NewsConfiguration.defaultSources(), try NewsConfiguration.defaultKeywords(), nil)
         } catch {
-            sources = []
-            keywords = KeywordList(topics: [:])
-            configurationError = "Nie udało się wczytać konfiguracji: \(error.localizedDescription)"
+            configuration = ([], KeywordList(topics: [:]), "Nie udało się wczytać konfiguracji: \(error.localizedDescription)")
         }
-        self.sources = sources
-        self.configurationError = configurationError
+        let keywords = configuration.keywords
+        self.sources = configuration.sources
+        self.configurationError = configuration.error
 
         let directory = (try? FileManager.default.url(
             for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true
