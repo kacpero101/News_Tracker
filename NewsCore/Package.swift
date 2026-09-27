@@ -9,6 +9,7 @@ let package = Package(
     ],
     products: [
         .library(name: "NewsCore", targets: ["NewsCore"]),
+        .executable(name: "price-watch", targets: ["PriceWatch"]),
     ],
     targets: [
         .target(
@@ -16,6 +17,11 @@ let package = Package(
             resources: [
                 .process("Resources"),
             ]
+        ),
+        // Command-line price watcher run by GitHub Actions (sends ntfy notifications).
+        .executableTarget(
+            name: "PriceWatch",
+            dependencies: ["NewsCore"]
         ),
         .testTarget(
             name: "NewsCoreTests",

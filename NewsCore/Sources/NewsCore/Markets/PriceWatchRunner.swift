@@ -44,7 +44,7 @@ public struct PriceWatchRunner: Sendable {
                 report.series[asset.id] = series
                 report.alerts += PriceAlertEngine.newAlerts(for: asset, series: series, now: now, previousCheck: previousCheck)
             case let .failure(error)?:
-                report.failures[asset.id] = (error as? LocalizedError)?.errorDescription ?? String(describing: error)
+                report.failures[asset.id] = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             case nil:
                 break
             }
