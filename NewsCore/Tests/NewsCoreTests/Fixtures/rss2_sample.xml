@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Sample Business News</title>
+    <link>https://news.example.com/business</link>
+    <description>Business headlines</description>
+    <atom:link href="https://news.example.com/business/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Central bank raises interest rates to fight inflation</title>
+      <link>https://news.example.com/business/rates-2024?utm_source=rss&amp;utm_medium=feed</link>
+      <description><![CDATA[<p>The <b>central bank</b> raised rates by 0.25 points &amp; signalled more to come.</p><img src="x.jpg"/>]]></description>
+      <pubDate>Wed, 01 May 2024 10:30:00 GMT</pubDate>
+      <guid isPermaLink="false">rates-2024</guid>
+    </item>
+    <item>
+      <title>Bitcoin climbs above $70,000 as ETF inflows surge</title>
+      <link>https://news.example.com/markets/bitcoin-70k</link>
+      <description>Crypto markets rallied on Tuesday.</description>
+      <pubDate>Tue, 30 Apr 2024 08:00:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Guid-only item with &quot;quoted&quot; title</title>
+      <guid>https://news.example.com/guid-only</guid>
+      <dc:date>2024-04-29T12:00:00Z</dc:date>
+      <content:encoded><![CDATA[<div>Only content encoded here.</div>]]></content:encoded>
+    </item>
+  </channel>
+</rss>

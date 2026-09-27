@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="de">
+  <title type="text">Beispiel Wissenschaft</title>
+  <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
+  <updated>2024-05-02T09:00:00Z</updated>
+  <link rel="self" href="https://wissen.example.de/atom.xml"/>
+  <entry>
+    <title type="html">Forscher entdecken neue Batterie-Technologie</title>
+    <link rel="alternate" type="text/html" href="https://wissen.example.de/batterie"/>
+    <link rel="enclosure" href="https://wissen.example.de/batterie.jpg"/>
+    <id>tag:wissen.example.de,2024:batterie</id>
+    <published>2024-05-02T08:15:30+02:00</published>
+    <updated>2024-05-02T09:00:00Z</updated>
+    <summary type="html">&lt;p&gt;Ein &lt;em&gt;Durchbruch&lt;/em&gt; für Elektroautos.&lt;/p&gt;</summary>
+    <author><name>Redaktion</name></author>
+  </entry>
+  <entry>
+    <title>Bundestag beschließt neues Gesetz</title>
+    <link href="https://wissen.example.de/gesetz"/>
+    <id>tag:wissen.example.de,2024:gesetz</id>
+    <updated>2024-05-01T18:45:00.123Z</updated>
+    <content type="html">&lt;p&gt;Die Regierung hat sich geeinigt.&lt;/p&gt;</content>
+  </entry>
+</feed>

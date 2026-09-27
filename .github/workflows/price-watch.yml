@@ -1,0 +1,77 @@
+# Checks watched prices (alerts.json) every hour and sends push notifications via ntfy.sh.
+#
+# Setup (one-time):
+#   1. Install the ntfy app on your phone and subscribe to a long, random topic name.
+#   2. Repository → Settings → Secrets and variables → Actions → New repository secret:
+#      NTFY_TOPIC = <your topic name>
+#   3. Edit alerts.json (or export it from the app: Settings → Price notifications).
+#
+# Scheduled workflows run only from the default branch (main).
+name: Price watch
+
+on:
+  schedule:
+    - cron: "17 * * * *" # every hour at :17 (GitHub may delay scheduled runs)
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Send a test notification only"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: price-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Swift build
+        uses: actions/cache@v4
+        with:
+          path: NewsCore/.build
+          key: price-watch-build-${{ runner.os }}-${{ hashFiles('NewsCore/Package.swift', 'NewsCore/Sources/**') }}
+          restore-keys: price-watch-build-${{ runner.os }}-
+
+      # The time of the previous check is kept in the Actions cache, so every move is
+      # reported once. Cache entries are immutable, hence a new key per run.
+      - name: Restore watcher state
+        uses: actions/cache/restore@v4
+        with:
+          path: .price-watch-state
+          key: price-watch-state-${{ github.run_id }}
+          restore-keys: price-watch-state-
+
+      - name: Build price-watch
+        run: swift build -c release --package-path NewsCore --product price-watch
+
+      - name: Send test notification
+        if: ${{ inputs.test }}
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: NewsCore/.build/release/price-watch --test
+
+      - name: Check prices
+        if: ${{ !inputs.test }}
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          mkdir -p .price-watch-state
+          NewsCore/.build/release/price-watch \
+            --config alerts.json \
+            --state .price-watch-state/state.json \
+            --interval-minutes 60
+
+      - name: Save watcher state
+        if: ${{ !inputs.test && success() }}
+        uses: actions/cache/save@v4
+        with:
+          path: .price-watch-state
+          key: price-watch-state-${{ github.run_id }}

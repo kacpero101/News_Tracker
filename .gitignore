@@ -5,6 +5,7 @@
 *.xcodeproj/
 *.xcworkspace/
 xcuserdata/
+NewsTrackerApp/Info.plist
 DerivedData/
 *.xcuserstate
 
